@@ -1,7 +1,7 @@
 /**
  * The my-hello web component module.
  *
- * @author // TODO: YOUR NAME <YOUR EMAIL>
+ * @author Pauliina Raitaniemi <pr222ja@student.lnu.se>
  * @version 1.0.0
  */
 
@@ -36,6 +36,9 @@ template.innerHTML = `
  * Define custom element.
  */
 customElements.define('my-hello',
+/**
+ * Create an anonymous class extending HTMLElement.
+ */
   class extends HTMLElement {
     /**
      * Creates an instance of the current type.
