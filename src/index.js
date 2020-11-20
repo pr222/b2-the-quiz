@@ -5,6 +5,12 @@
  * @version 1.0.0
  */
 
+import './components/quiz-app/'
+import './components/quiz-questions/'
+import './components/user-nickname/'
+import './components/high-score/'
+import './components/countdown-timer/'
+
 const messageContainer = document.querySelector('#messageContainer')
 const message = document.createTextNode('Hi from an ECMAScript Module.')
 messageContainer.appendChild(message)
