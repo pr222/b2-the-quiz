@@ -9,19 +9,35 @@
  * Define the template.
  */
 const template = document.createElement('template')
-template.innterHTML = ` 
+template.innerHTML = ` 
 <style>
+  :host {
+      display: block;
+      background-color: #CCCCCC;
+  }
 
+  #timer {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+  }
+
+  div {
+    border: 1px solid;
+    padding: 5px;
+  }
 </style>
 
-<div>
-
+<div id="timer">
+  <div id="countdown">0</div>
+  <div><p>seconds left.</p></div>
 </div>
 `
 /**
  * Define the custom element.
  */
-customElements.define('',
+customElements.define('countdown-timer',
 /**
  * Anonymous class for the element.
  */
@@ -36,7 +52,8 @@ customElements.define('',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
-      //
+      // Default time limit of 20 seconds.
+      this._limit = 20
     }
 
     /**
