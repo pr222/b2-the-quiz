@@ -20,7 +20,7 @@ template.innterHTML = `
 /**
  * Define the custom element.
  */
-customElements.define('',
+customElements.define('high-score',
 /**
  * Anonymous class for the element.
  */

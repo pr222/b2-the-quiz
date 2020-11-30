@@ -20,7 +20,7 @@ template.innterHTML = `
 /**
  * Define the custom element.
  */
-customElements.define('',
+customElements.define('quiz-questions',
 /**
  * Anonymous class for the element.
  */

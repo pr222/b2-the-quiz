@@ -11,8 +11,13 @@ import './components/user-nickname/'
 import './components/high-score/'
 import './components/countdown-timer/'
 
-const messageContainer = document.querySelector('#messageContainer')
-const message = document.createTextNode('Hi from an ECMAScript Module.')
-messageContainer.appendChild(message)
+// const messageContainer = document.querySelector('#messageContainer')
+// const message = document.createTextNode('Hi from an ECMAScript Module.')
+// messageContainer.appendChild(message)
 
-// TODO: This is just some temple code that you are free to use, modify or completly delete. Add your code here instead.
+// A container-div on index.html
+const container = document.querySelector('#container')
+
+// Create a countdown-timer and insert to page.
+const countdownTimer = document.createElement('countdown-timer')
+container.appendChild(countdownTimer)

@@ -62,7 +62,21 @@ customElements.define('countdown-timer',
      * @returns {string[]} - An array with stings of the attibutes.
      */
     static get observedAttributes () {
-      return ['']
+      return ['limit']
+    }
+
+    /**
+     * Called by the browser when an attribute is changed.
+     *
+     * @param {string} name - The name of the attribute.
+     * @param {any} oldValue - The old attribute value.
+     * @param {any} newValue - The new attribute.
+     */
+    attributeChangedCallback (name, oldValue, newValue) {
+      //
+      if (name === 'limit') {
+        this._limit = newValue
+      }
     }
 
     /**
@@ -79,17 +93,10 @@ customElements.define('countdown-timer',
       //
     }
 
-    /**
-     * Called by the browser when an attribute is changed.
-     *
-     * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
-      //
-    }
+    // Reset the timer?
+    // reset () {
 
-    //
+    //   return this
+    // }
   }
 )

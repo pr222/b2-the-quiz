@@ -21,7 +21,7 @@ template.innterHTML = `
 /**
  * Define the custom element.
  */
-customElements.define('',
+customElements.define('user-nickname',
 /**
  * Anonymous class for the element.
  */
