@@ -19,7 +19,7 @@ template.innerHTML = `
   #timer {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
+   /* align-items: baseline; */
     justify-content: center;
   }
 
@@ -30,7 +30,7 @@ template.innerHTML = `
 </style>
 
 <div id="timer">
-  <div id="countdown"></div>
+  <div id="counter"></div>
   <div><p>seconds</p></div>
 </div>
 `
@@ -55,8 +55,11 @@ customElements.define('countdown-timer',
       // Default time limit of 20 seconds.
       this._limit = 20
 
+      this._counter = this.shadowRoot.querySelector('#counter')
+
       // Binding so that it reaches the limit-property.
       this._countdown = this._countdown.bind(this)
+      this._displayTime = this._displayTime.bind(this)
     }
 
     /**
@@ -88,6 +91,7 @@ customElements.define('countdown-timer',
     connectedCallback () {
       //
       window.addEventListener('load', this._countdown)
+      // window.addEventListener('load', this._displayTime)
     }
 
     /**
@@ -105,26 +109,52 @@ customElements.define('countdown-timer',
      */
     _reset (timer) {
       clearInterval(timer)
-      console.log('clearing')
+      console.log('clearing countdown timer')
     }
 
     /**
-     * Counter.
+     * Timer counting down.
      *
      */
     _countdown () {
-      // const timings = []
+      // Starting number for the timer.
+      let timing = this._limit + 1
+      // console.log(this._limit)
 
+      // Begin timer in an interval.
       const timer = setInterval(() => {
-        const start = new Date().getSeconds()
-        console.log(this._limit)
-        console.log(start)
-        console.log('timing')
+        // Decrease timer by one.
+        timing--
+        // console.log(`Timing: ${timing}`)
 
-        if (start > this._limit) {
+        // Stop the timer when reaching 0.
+        if (timing <= 0) {
           this._reset(timer)
         }
+
+        this._displayTime(timing)
       }, 1000)
+    }
+
+    /**
+     * Display current time.
+     *
+     * @param {number} time - The number of the current second.
+     */
+    _displayTime (time) {
+      // console.log(this._counter)
+      // console.log(time)
+      // See if there is a number and remove if so.
+      if (this._counter.hasChildNodes()) {
+        this._counter.removeChild(this._counter.firstChild)
+      }
+
+      // Create a element to present and add the time in.
+      const number = document.createElement('p')
+      number.textContent = time
+
+      // Add the time to the #counter-div.
+      this._counter.append(number)
     }
   }
 )
