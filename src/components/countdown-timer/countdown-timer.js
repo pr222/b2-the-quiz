@@ -55,9 +55,10 @@ customElements.define('countdown-timer',
       // Default time limit of 20 seconds.
       this._limit = 20
 
+      // Get the div-element for displaying counter.
       this._counter = this.shadowRoot.querySelector('#counter')
 
-      // Binding so that it reaches the limit-property.
+      // Bindings for reaching the this._limit-property.
       this._countdown = this._countdown.bind(this)
       this._displayTime = this._displayTime.bind(this)
     }
@@ -75,8 +76,8 @@ customElements.define('countdown-timer',
      * Called by the browser when an attribute is changed.
      *
      * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
+     * @param {string} oldValue - The old attribute value.
+     * @param {string} newValue - The new attribute.
      */
     attributeChangedCallback (name, oldValue, newValue) {
       //
@@ -99,17 +100,21 @@ customElements.define('countdown-timer',
      */
     disconnectedCallback () {
       //
-      // this.removeEventListener('onload', this._countdown)
+      // this.removeEventListener()
     }
 
     /**
      * Stop the timer.
      *
-     * @param {*} timer - The interval to stop/clear out.
+     * @param {number} timer - The timer-interval to stop.
+     * @returns {object} - Reference to itself.
+     *
      */
     _reset (timer) {
       clearInterval(timer)
       console.log('clearing countdown timer')
+
+      return this
     }
 
     /**
@@ -117,22 +122,23 @@ customElements.define('countdown-timer',
      *
      */
     _countdown () {
-      // Starting number for the timer.
-      let timing = this._limit + 1
-      // console.log(this._limit)
+      let counter = 0
+      let time = this._limit
+
+      // First display of starting number.
+      this._displayTime(time)
 
       // Begin timer in an interval.
       const timer = setInterval(() => {
-        // Decrease timer by one.
-        timing--
-        // console.log(`Timing: ${timing}`)
+        counter++
+        time = this._limit - counter
 
         // Stop the timer when reaching 0.
-        if (timing <= 0) {
+        if (time <= 0) {
           this._reset(timer)
         }
 
-        this._displayTime(timing)
+        this._displayTime(time)
       }, 1000)
     }
 
@@ -142,9 +148,7 @@ customElements.define('countdown-timer',
      * @param {number} time - The number of the current second.
      */
     _displayTime (time) {
-      // console.log(this._counter)
-      // console.log(time)
-      // See if there is a number and remove if so.
+      // Remove element if there is one.
       if (this._counter.hasChildNodes()) {
         this._counter.removeChild(this._counter.firstChild)
       }
@@ -153,7 +157,7 @@ customElements.define('countdown-timer',
       const number = document.createElement('p')
       number.textContent = time
 
-      // Add the time to the #counter-div.
+      // Add the time-number to the #counter-div.
       this._counter.append(number)
     }
   }
