@@ -11,8 +11,18 @@
 const template = document.createElement('template')
 template.innerHTML = ` 
 <style>
-
+  :host {
+    display: block;
+    background-color: #CCCCCC;
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 1px;
+    padding-bottom: 15px;
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 </style>
+
 <h1>Choose a username!</h1>
 <form id="nameForm">
   <label for="username">Username: </label>

@@ -12,8 +12,11 @@ const template = document.createElement('template')
 template.innerHTML = ` 
 <style>
   :host {
-      display: block;
-      background-color: #CCCCCC;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+    display: block;
+    background-color: #CCCCCC;
+    border-radius: 5px;
   }
 
   #timer {
@@ -23,15 +26,14 @@ template.innerHTML = `
     justify-content: center;
   }
 
-  div {
-    border: 1px solid;
-    padding: 5px;
+  #counter {
+    margin-right: 5px;
   }
 </style>
 
 <div id="timer">
   <div id="counter"></div>
-  <div><p>seconds</p></div>
+  <div><p>seconds left</p></div>
 </div>
 `
 /**
