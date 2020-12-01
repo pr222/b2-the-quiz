@@ -9,14 +9,16 @@
  * Define the template.
  */
 const template = document.createElement('template')
-template.innterHTML = ` 
+template.innerHTML = ` 
 <style>
 
 </style>
-
-<div>
-
-</div>
+<h1>Choose a username!</h1>
+<form id="nameForm">
+  <label for="username">Username: </label>
+  <input type="text" id="username" name="username" autofocus autocomplete="off">
+  <input type="submit" value="Confirm name">
+</form>
 `
 /**
  * Define the custom element.
@@ -36,7 +38,11 @@ customElements.define('user-nickname',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
+      this._userInput = this.shadowRoot.querySelector('#username')
+      this._submitUser = this.shadowRoot.querySelector('#nameForm')
       //
+
+      this._onSubmit = this._onSubmit.bind(this)
     }
 
     /**
@@ -53,6 +59,7 @@ customElements.define('user-nickname',
      */
     connectedCallback () {
       //
+      this._submitUser.addEventListener('submit', this._onSubmit)
     }
 
     /**
@@ -60,6 +67,19 @@ customElements.define('user-nickname',
      */
     disconnectedCallback () {
       //
+      this._submitUser.removeEventListener('submit', this._onSubmit)
+    }
+
+    /**
+     * Take care of submit username-event.
+     *
+     * @param {Event} event - submit the username.
+     */
+    _onSubmit (event) {
+      event.preventDefault()
+
+      const input = this._userInput.value
+      console.log(input)
     }
 
     /**

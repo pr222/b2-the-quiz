@@ -21,5 +21,3 @@ const container = document.querySelector('#container')
 // Create a countdown-timer and insert to page.
 const countdownTimer = document.createElement('countdown-timer')
 container.appendChild(countdownTimer)
-
-

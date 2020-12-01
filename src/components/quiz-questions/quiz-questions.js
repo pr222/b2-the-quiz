@@ -8,7 +8,7 @@
  * Define the template.
  */
 const template = document.createElement('template')
-template.innterHTML = ` 
+template.innerHTML = ` 
 <style>
 
 </style>
