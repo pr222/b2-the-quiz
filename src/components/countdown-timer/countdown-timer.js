@@ -30,8 +30,8 @@ template.innerHTML = `
 </style>
 
 <div id="timer">
-  <div id="countdown">0</div>
-  <div><p>seconds left.</p></div>
+  <div id="countdown"></div>
+  <div><p>seconds</p></div>
 </div>
 `
 /**
@@ -54,6 +54,9 @@ customElements.define('countdown-timer',
 
       // Default time limit of 20 seconds.
       this._limit = 20
+
+      // Binding so that it reaches the limit-property.
+      this._countdown = this._countdown.bind(this)
     }
 
     /**
@@ -84,6 +87,7 @@ customElements.define('countdown-timer',
      */
     connectedCallback () {
       //
+      window.addEventListener('load', this._countdown)
     }
 
     /**
@@ -91,12 +95,36 @@ customElements.define('countdown-timer',
      */
     disconnectedCallback () {
       //
+      // this.removeEventListener('onload', this._countdown)
     }
 
-    // Reset the timer?
-    // reset () {
+    /**
+     * Stop the timer.
+     *
+     * @param {*} timer - The interval to stop/clear out.
+     */
+    _reset (timer) {
+      clearInterval(timer)
+      console.log('clearing')
+    }
 
-    //   return this
-    // }
+    /**
+     * Counter.
+     *
+     */
+    _countdown () {
+      // const timings = []
+
+      const timer = setInterval(() => {
+        const start = new Date().getSeconds()
+        console.log(this._limit)
+        console.log(start)
+        console.log('timing')
+
+        if (start > this._limit) {
+          this._reset(timer)
+        }
+      }, 1000)
+    }
   }
 )
