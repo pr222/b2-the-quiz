@@ -93,7 +93,8 @@ customElements.define('countdown-timer',
      */
     connectedCallback () {
       //
-      window.addEventListener('load', this._countdown)
+      // window.addEventListener('load', this._countdown)
+      window.addEventListener('startQuestion', this._countdown)
       // window.addEventListener('load', this._displayTime)
     }
 

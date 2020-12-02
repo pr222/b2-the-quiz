@@ -88,15 +88,11 @@ customElements.define('user-nickname',
         this._userInput.focus()
         this._userInput.select()
       } else {
-        // Set unique id-number depending on when user is added.
-        // Although not the perfect serialization since other
-        // things also gets saved in the web storage.
-        const name = sessionStorage.length + 1
-        sessionStorage.setItem(`user_${name}`, input)
+        // Create new event sending away the name of the user.
+        this.dispatchEvent(new CustomEvent('newUser', { bubbles: true, detail: { username: input } }))
 
-        console.log(sessionStorage.getItem(`user_${name}`))
-
-        this.dispatchEvent(new CustomEvent('newUser', { bubbles: true }))
+        // Empty the input field.
+        this._userInput.value = ''
       }
     }
   }
