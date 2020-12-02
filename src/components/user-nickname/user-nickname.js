@@ -17,8 +17,9 @@ template.innerHTML = `
     background-color: #CCCCCC;
     text-align: center;
     margin-top: 25px;
+    margin-bottom: 15px;
     padding-top: 1px;
-    padding-bottom: 15px;
+    padding-bottom: 25px;
     border-radius: 5px;
     font-family: Arial, Helvetica, sans-serif;
   }
@@ -94,6 +95,8 @@ customElements.define('user-nickname',
         sessionStorage.setItem(`user_${name}`, input)
 
         console.log(sessionStorage.getItem(`user_${name}`))
+
+        this.dispatchEvent(new CustomEvent('newUser', { bubbles: true }))
       }
     }
   }

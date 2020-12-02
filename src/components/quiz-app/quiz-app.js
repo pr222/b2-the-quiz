@@ -11,16 +11,29 @@
 const template = document.createElement('template')
 template.innerHTML = `
   <style>
-    .message-board {
-      font-size: 1.2em;
-      color:white;
-      background-color: #333;
-      padding: 1em;
-      margin: 1em;
+    :host {
+      font-family: Arial, Helvetica, sans-serif;
     }
+
+    header {
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
   </style>
-  <div class="message-board">
-  </div>
+
+  <header>
+    <h1>Quiz Time!</h1>
+  </header>
+
+  <user-nickname id="user"></user-nickname>
+  <countdown-timer class="hidden"></countdown-timer>
+  <high-score class="hidden"></high-score>
+  <!-- <div class="message-board">
+  </div>  -->
 `
 
 /**
@@ -44,6 +57,8 @@ customElements.define('quiz-app',
 
       // Get the message board element in the shadow root.
       this._messageBoard = this.shadowRoot.querySelector('.message-board')
+
+      this._username = this.shadowRoot.querySelector('#user')
     }
 
     /**
@@ -56,17 +71,6 @@ customElements.define('quiz-app',
     }
 
     /**
-     * Called after the element is inserted into the DOM.
-     */
-    connectedCallback () {
-      if (!this.hasAttribute('message')) {
-        this.setAttribute('message', 'A simple hello from a web component.')
-      }
-
-      this._upgradeProperty('message')
-    }
-
-    /**
      * Called when observed attribute(s) changes.
      *
      * @param {string} name - The attribute's name.
@@ -75,14 +79,30 @@ customElements.define('quiz-app',
      */
     attributeChangedCallback (name, oldValue, newValue) {
       if (name === 'message') {
-        this._messageBoard.textContent = newValue
+        // this._messageBoard.textContent = newValue
       }
+    }
+
+    /**
+     * Called after the element is inserted into the DOM.
+     */
+    connectedCallback () {
+      // if (!this.hasAttribute('message')) {
+      //   this.setAttribute('message', 'A simple hello from a web component.')
+      // }
+
+      // this._upgradeProperty('message')
+      this._username.addEventListener('newUser', this._newUser)
     }
 
     /**
      * Called after the element has been removed from the DOM.
      */
     disconnectedCallback () {
+    }
+
+    _newUser (event) {
+      console.log('New user here!')
     }
 
     /**

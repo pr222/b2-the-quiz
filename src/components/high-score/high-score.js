@@ -29,9 +29,8 @@ table {
   background-color: #CCCCCC;
   border-radius: 5px;
 }
-
-
 </style>
+
 <div>
   <table>
     <thead>
@@ -80,7 +79,18 @@ customElements.define('high-score',
      * @returns {string[]} - An array with stings of the attibutes.
      */
     static get observedAttributes () {
-      return ['']
+      return ['hidden']
+    }
+
+    /**
+     * Called by the browser when an attribute is changed.
+     *
+     * @param {string} name - The name of the attribute.
+     * @param {any} oldValue - The old attribute value.
+     * @param {any} newValue - The new attribute.
+     */
+    attributeChangedCallback (name, oldValue, newValue) {
+      //
     }
 
     /**
@@ -94,17 +104,6 @@ customElements.define('high-score',
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
-      //
-    }
-
-    /**
-     * Called by the browser when an attribute is changed.
-     *
-     * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
       //
     }
 
