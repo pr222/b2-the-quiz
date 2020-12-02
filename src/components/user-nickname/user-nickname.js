@@ -23,11 +23,11 @@ template.innerHTML = `
   }
 </style>
 
-<h1>Choose a username!</h1>
+<h1>Choose a nickname!</h1>
 <form id="nameForm">
-  <label for="username">Username: </label>
+  <label for="username">Name: </label>
   <input type="text" id="username" name="username" autofocus autocomplete="off">
-  <input type="submit" value="Confirm name">
+  <input type="submit" value="Confirm">
 </form>
 `
 /**
@@ -56,15 +56,6 @@ customElements.define('user-nickname',
     }
 
     /**
-     * Looks out for changes in attributes.
-     *
-     * @returns {string[]} - An array with stings of the attibutes.
-     */
-    static get observedAttributes () {
-      return ['']
-    }
-
-    /**
      * Called when the element has been insterted into the DOM.
      */
     connectedCallback () {
@@ -87,9 +78,31 @@ customElements.define('user-nickname',
      */
     _onSubmit (event) {
       event.preventDefault()
-
       const input = this._userInput.value
-      console.log(input)
+
+      if (input.length < 1 || input === 'Please choose a name!') {
+        // Make sure user enters at least a letter as its username.
+        this._userInput.value = 'Please choose a name!'
+        this._userInput.focus()
+        this._userInput.select()
+      } else {
+        // Set unique id-number depending on when user is added.
+        // Although not the perfect serialization since other
+        // things also gets saved in the web storage.
+        const name = sessionStorage.length + 1
+        sessionStorage.setItem(`user_${name}`, input)
+
+        console.log(sessionStorage.getItem(`user_${name}`))
+      }
+    }
+
+    /**
+     * Looks out for changes in attributes.
+     *
+     * @returns {string[]} - An array with stings of the attibutes.
+     */
+    static get observedAttributes () {
+      return ['']
     }
 
     /**
