@@ -10,11 +10,47 @@
 const template = document.createElement('template')
 template.innerHTML = ` 
 <style>
+:host {
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+div {
+  margin: 10px;
+}
+
+h1 {
+  margin: 0px;
+}
+
+table {
+  border-spacing: 15px;
+  margin: 0 auto;
+  background-color: #CCCCCC;
+  border-radius: 5px;
+}
+
 
 </style>
-
 <div>
-
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2"><h1>Highscores</h1></th>
+      </tr>
+      <tr>
+        <th>Player</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr id="first"></tr>
+    <tr id="second"></tr>
+    <tr id="third"></tr>
+    <tr id="fourth"></tr>
+    <tr id="fifth"></tr>
+    </tbody>
+  </table>
 </div>
 `
 /**
