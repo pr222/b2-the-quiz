@@ -5,12 +5,6 @@
  * @version 1.0.0
  */
 
-// Get the URL for the component image.
-// /js/components/my-hello/img/mushroom.svg
-// This is a Snowpack feature and not implemented in the standard.
-// See example of use in CSS
-import mushroom from './img/mushroom.svg'
-
 /**
  * Define template.
  */
@@ -23,9 +17,6 @@ template.innerHTML = `
       background-color: #333;
       padding: 1em;
       margin: 1em;
-      background-image: url(${mushroom});
-      background-repeat: no-repeat;
-      background-position: right center;
     }
   </style>
   <div class="message-board">
@@ -35,7 +26,7 @@ template.innerHTML = `
 /**
  * Define custom element.
  */
-customElements.define('my-hello',
+customElements.define('quiz-app',
 /**
  * Create an anonymous class extending HTMLElement.
  */

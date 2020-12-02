@@ -11,10 +11,6 @@ import './components/user-nickname/'
 import './components/high-score/'
 import './components/countdown-timer/'
 
-// const messageContainer = document.querySelector('#messageContainer')
-// const message = document.createTextNode('Hi from an ECMAScript Module.')
-// messageContainer.appendChild(message)
-
 // A container-div on index.html
 const container = document.querySelector('#container')
 

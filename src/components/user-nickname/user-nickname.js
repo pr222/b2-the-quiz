@@ -1,5 +1,6 @@
 /**
- * The user-nickname web component module.
+ * The user-nickname web component module which handles a form
+ * element and saves the submitted name as a new user.
  *
  * @author Pauliina Raitaniemi <pr222ja@student.lnu.se>
  * @version 1.0.0
@@ -95,27 +96,5 @@ customElements.define('user-nickname',
         console.log(sessionStorage.getItem(`user_${name}`))
       }
     }
-
-    /**
-     * Looks out for changes in attributes.
-     *
-     * @returns {string[]} - An array with stings of the attibutes.
-     */
-    static get observedAttributes () {
-      return ['']
-    }
-
-    /**
-     * Called by the browser when an attribute is changed.
-     *
-     * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
-      //
-    }
-
-    //
   }
 )
