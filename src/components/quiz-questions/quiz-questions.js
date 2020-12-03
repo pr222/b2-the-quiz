@@ -16,16 +16,25 @@ template.innerHTML = `
   :host {
     display: block;
     font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #CCCCCC;
+    border-radius: 5px;
+  }
+
+  :host div {
+    padding-top: 1px;
+    padding-bottom: 25px;
+    text-align: center;
+    margin-top: 10px;
   }
 </style>
 
 <div>
-  <h2>Question</h2>
+  <h1 id="question">Question</h1>
 
   <form id="answerForm">
     <label for="answerInput">Answer: </label>
     <input type="text" id="answerInput" name="answerInput" autofocus autocomplete="off">
-    <input type="submit" value="Submit answer">
+    <input type="submit" value="Send answer">
   </form>
 </div>
 `
@@ -46,6 +55,9 @@ customElements.define('quiz-questions',
       // Attach shadow root and append template.
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
+
+      // Get the header element for displaying the question.
+      this._question = this.shadowRoot.querySelector('#question')
 
       // Get the text input field of the form.
       this._answerInput = this.shadowRoot.querySelector('#answerInput')
@@ -100,9 +112,13 @@ customElements.define('quiz-questions',
      * @param {Event} event -
      */
     async _startQuestion (event) {
-      const question = await this._getQuestion(apiUrl)
+      const question1 = await this._getQuestion(apiUrl)
 
-      console.log(question.question)
+      const question2 = question1.question
+      const url = question1.nextURL
+      console.log(url)
+      this._displayQuestion(question2)
+
     }
 
     /**
@@ -113,26 +129,71 @@ customElements.define('quiz-questions',
      */
     async _getQuestion (url) {
       const response = await fetch(`${url}`)
-      // console.log(response)
-      const result = await response.json()
-      // console.log(result)
-      return result
+      console.log(response)
+
+      if (!response.ok) {
+        const message = `Oops, an error: ${response.status}`
+        throw new Error(message)
+      }
+
+      const body = await response.json()
+      console.log(body)
+      return body
     }
+
+    // _getGuestion().catch(error => {
+    //   error.message
+    // })
 
     /**
      * Take care of submit answer-event.
      *
      * @param {Event} event - submit the answer.
      */
-    _onSubmit (event) {
+    async _onSubmit (event) {
       // Prevent default posting of form submission.
       event.preventDefault()
 
-      const answer = this._answerInput.value
-      console.log(answer)
+      const answer = { answer: this._answerInput.value }
+      // console.log(answer)
+      const jsonAnswer =JSON.stringify(answer)
+      console.log(jsonAnswer)
+      // const answer = this._answerInput.value
 
       // POST ANSWER
+      const postAnswer = await fetch('http://courselab.lnu.se/answer/1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonAnswer
+      })
+
+
+
+      const body = await postAnswer.json()
+      console.log(body)
+
+      if (!postAnswer.ok) {
+        const message = `Oops, an error: ${postAnswer.status}`
+        throw new Error(message)
+      }
+
+
     }
     //
+
+    /**
+     * Display current question.
+     *
+     * @param {*} question - The question to display.
+     */
+    _displayQuestion (question) {
+      if (this._question.textContent > 0) {
+        this._question.textContent = ''
+      }
+
+      this._question.textContent = question
+    }
   }
 )
