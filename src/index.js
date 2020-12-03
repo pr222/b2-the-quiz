@@ -10,10 +10,3 @@ import './components/quiz-questions/'
 import './components/user-nickname/'
 import './components/high-score/'
 import './components/countdown-timer/'
-
-// A container-div on index.html
-// const container = document.querySelector('#container')
-
-// Create a countdown-timer and insert to page.
-// const countdownTimer = document.createElement('countdown-timer')
-// container.appendChild(countdownTimer)

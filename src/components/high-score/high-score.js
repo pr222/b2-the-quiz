@@ -79,7 +79,7 @@ customElements.define('high-score',
      * @returns {string[]} - An array with stings of the attibutes.
      */
     static get observedAttributes () {
-      return ['hidden']
+      return []
     }
 
     /**

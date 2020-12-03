@@ -32,6 +32,7 @@ template.innerHTML = `
   <input type="submit" value="Confirm">
 </form>
 `
+
 /**
  * Define the custom element.
  */
@@ -50,10 +51,13 @@ customElements.define('user-nickname',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
+      // Get the text input field of the form.
       this._userInput = this.shadowRoot.querySelector('#username')
-      this._submitUser = this.shadowRoot.querySelector('#nameForm')
-      //
 
+      // Get the form element for listening to the submit event.
+      this._submitUser = this.shadowRoot.querySelector('#nameForm')
+
+      // Binding for _onSubmit to reach this.
       this._onSubmit = this._onSubmit.bind(this)
     }
 
@@ -61,7 +65,6 @@ customElements.define('user-nickname',
      * Called when the element has been insterted into the DOM.
      */
     connectedCallback () {
-      //
       this._submitUser.addEventListener('submit', this._onSubmit)
     }
 
@@ -69,7 +72,6 @@ customElements.define('user-nickname',
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
-      //
       this._submitUser.removeEventListener('submit', this._onSubmit)
     }
 
@@ -79,11 +81,13 @@ customElements.define('user-nickname',
      * @param {Event} event - submit the username.
      */
     _onSubmit (event) {
+      // Prevent default posting of form submission.
       event.preventDefault()
+
       const input = this._userInput.value
 
+      // Make sure user enters at least 1 letter as its username.
       if (input.length < 1 || input === 'Please choose a name!') {
-        // Make sure user enters at least a letter as its username.
         this._userInput.value = 'Please choose a name!'
         this._userInput.focus()
         this._userInput.select()
@@ -91,7 +95,7 @@ customElements.define('user-nickname',
         // Create new event sending away the name of the user.
         this.dispatchEvent(new CustomEvent('newUser', { bubbles: true, detail: { username: input } }))
 
-        // Empty the input field.
+        // Making sure to empty the input field for next use.
         this._userInput.value = ''
       }
     }

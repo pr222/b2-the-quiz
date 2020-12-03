@@ -10,11 +10,13 @@
 const template = document.createElement('template')
 template.innerHTML = ` 
 <style>
-
+  :host {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
 </style>
 
 <div>
-
+  <h1>Question</h1>
 </div>
 `
 /**

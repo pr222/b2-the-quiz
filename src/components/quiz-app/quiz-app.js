@@ -31,6 +31,7 @@ template.innerHTML = `
 
   <user-nickname id="user"></user-nickname>
   <countdown-timer id="timer" class="hidden"></countdown-timer>
+  <quiz-questions></quiz-questions>
   <high-score class="hidden"></high-score>
 
   <!-- <div class="message-board">
@@ -59,10 +60,15 @@ customElements.define('quiz-app',
       // Get the message board element in the shadow root.
       this._messageBoard = this.shadowRoot.querySelector('.message-board')
 
+      // Get the custom element for submitting a username.
       this._userForm = this.shadowRoot.querySelector('#user')
+
+      // Get the custom element for a countdown timer.
       this._timer = this.shadowRoot.querySelector('#timer')
 
+      // Bindings for reaching this shadow.
       this._startQuestion = this._startQuestion.bind(this)
+      this._newUser = this._newUser.bind(this)
     }
 
     /**
@@ -108,25 +114,34 @@ customElements.define('quiz-app',
     }
 
     /**
-     * Register new user to the game.
+     * Takes care of event when user submits its name.
      *
      * @param {Event} event - When user has confimed its nickname.
      */
     _newUser (event) {
       console.log('New user here!')
       // Get the information obtained by the form from user-nickname.
-      const newUser = event.detail
+      const newUser = event.detail.username
       // console.log(newUser)
 
+      this._createUser(newUser)
+    }
+
+    /**
+     * Register a new user.
+     *
+     * @param {string} newUser - The nickname of the new user.
+     */
+    _createUser (newUser) {
       // Create a new user object.
       const user = {
-        player: newUser.username,
-        score: null
+        player: newUser,
+        score: 0
       }
 
       // Convert user-object to a JSON.
       const asJSON = JSON.stringify(user)
-      // console.log(asJSON)
+      console.log(asJSON)
 
       // Set unique id-number depending on when user is added.
       // Although not the perfect serialization since other
@@ -135,7 +150,7 @@ customElements.define('quiz-app',
       sessionStorage.setItem(`user_${id}`, asJSON)
       // console.log(sessionStorage.getItem(`user_${id}`))
 
-      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+      this._userForm.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
 
       //
     }
