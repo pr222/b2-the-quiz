@@ -27,12 +27,11 @@ template.innerHTML = `
 
   <div>
     <h1>Quiz Time!</h1>
-    <input type="button" id="restartButton" class="hidden" value="Restart">
+    <input type="button" id="restartButton"  value="Restart">
     <h2 id="announcement"></h2>
   </div>
-
   <user-nickname></user-nickname>
-  <countdown-timer class="hidden"></countdown-timer>
+  <countdown-timer class="hidden" limit="70"></countdown-timer>
   <quiz-questions class="hidden"></quiz-questions>
   <high-score class="hidden"></high-score>
 
@@ -78,7 +77,8 @@ customElements.define('quiz-app',
       this._highscores = this.shadowRoot.querySelector('high-score')
 
       // Bindings for reaching this shadow.
-      this._startQuestion = this._startQuestion.bind(this)
+      // this._startQuestion = this._startQuestion.bind(this)
+      // this._startGame = this._startGame.bind(this)
       this._newUser = this._newUser.bind(this)
     }
 
@@ -114,7 +114,9 @@ customElements.define('quiz-app',
 
       // this._upgradeProperty('message')
       this._userForm.addEventListener('newUser', this._newUser)
-      this._userForm.addEventListener('startQuestion', this._startQuestion)
+      // this._userForm.addEventListener('startQuestion', this._startQuestion)
+
+      // this._restartButton.addEventListener('click', this._resetGame)
     }
 
     /**
@@ -134,7 +136,6 @@ customElements.define('quiz-app',
       // Get the information obtained by the form from user-nickname.
       const newUser = event.detail.username
       // console.log(newUser)
-
       this._createUser(newUser)
     }
 
@@ -161,7 +162,9 @@ customElements.define('quiz-app',
       sessionStorage.setItem(`user_${id}`, asJSON)
       // console.log(sessionStorage.getItem(`user_${id}`))
 
-      this._userForm.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+      // this._userForm.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+
+      this._startGame()
 
       //
     }
@@ -170,8 +173,13 @@ customElements.define('quiz-app',
      * Switch to show questions.
      *
      */
-    _startQuestion () {
+    _startGame () {
+      this._renderGame()
 
+      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+      this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
+
+      this._gameState = 'quiz'
     }
 
     /**

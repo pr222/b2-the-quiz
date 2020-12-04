@@ -103,6 +103,7 @@ customElements.define('quiz-questions',
      */
     disconnectedCallback () {
       //
+      window.removeEventListener('startQuestion', this._startQuestion)
       this._submitAnswer.removeEventListener('submit', this._onSubmit)
     }
 

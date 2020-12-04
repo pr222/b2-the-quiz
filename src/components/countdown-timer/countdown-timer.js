@@ -90,13 +90,16 @@ customElements.define('countdown-timer',
      * Called when the element has been insterted into the DOM.
      */
     connectedCallback () {
-      window.addEventListener('startQuestion', this._countdown)
+      window.addEventListener('startTimer', this._countdown)
+      window.addEventListener('stopTimer', this._reset)
     }
 
     /**
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
+      window.removeEventListener('startTimer', this._countdown)
+      window.removeEventListener('stopTimer', this._reset)
     }
 
     /**
