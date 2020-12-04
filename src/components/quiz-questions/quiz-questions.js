@@ -119,6 +119,25 @@ customElements.define('quiz-questions',
       console.log(url)
       this._displayQuestion(question2)
 
+      // // // // // // // // // // // // // // // // // // // //
+      const answer = { answer: this._answerInput.value }
+      // console.log(answer)
+      const jsonAnswer =JSON.stringify(answer)
+      console.log(jsonAnswer)
+      // const answer = this._answerInput.value
+      
+      // POST ANSWER
+      const postAnswer = await fetch(`${url}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonAnswer
+      })
+
+      const body = await postAnswer.json()
+      console.log(body)
+      // // // // // // // // // // // // // // // // // // // //
     }
 
     /**
@@ -160,6 +179,7 @@ customElements.define('quiz-questions',
       console.log(jsonAnswer)
       // const answer = this._answerInput.value
 
+      // // // // // // // // // // // // // // // // // // // //
       // POST ANSWER
       const postAnswer = await fetch('http://courselab.lnu.se/answer/1', {
         method: 'POST',
@@ -169,15 +189,14 @@ customElements.define('quiz-questions',
         body: jsonAnswer
       })
 
-
-
       const body = await postAnswer.json()
       console.log(body)
 
-      if (!postAnswer.ok) {
-        const message = `Oops, an error: ${postAnswer.status}`
-        throw new Error(message)
-      }
+      // if (!postAnswer.ok) {
+      //   const message = `Oops, an error: ${postAnswer.status}`
+      //   throw new Error(message)
+      // }
+      // // // // // // // // // // // // // // // // // // // //
 
 
     }

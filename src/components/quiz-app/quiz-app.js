@@ -15,7 +15,7 @@ template.innerHTML = `
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    header {
+    div {
       text-align: center;
     }
 
@@ -25,13 +25,15 @@ template.innerHTML = `
 
   </style>
 
-  <header>
+  <div>
     <h1>Quiz Time!</h1>
-  </header>
+    <input type="button" id="restartButton" class="hidden" value="Restart">
+    <h2 id="announcement"></h2>
+  </div>
 
-  <user-nickname id="user"></user-nickname>
-  <countdown-timer id="timer" class="hidden"></countdown-timer>
-  <quiz-questions></quiz-questions>
+  <user-nickname></user-nickname>
+  <countdown-timer class="hidden"></countdown-timer>
+  <quiz-questions class="hidden"></quiz-questions>
   <high-score class="hidden"></high-score>
 
   <!-- <div class="message-board">
@@ -60,11 +62,20 @@ customElements.define('quiz-app',
       // Get the message board element in the shadow root.
       this._messageBoard = this.shadowRoot.querySelector('.message-board')
 
-      // Get the custom element for submitting a username.
-      this._userForm = this.shadowRoot.querySelector('#user')
+      // 'firstPage' as default state of the page.
+      // Other states: ¿'quiz'?, 'gameover', 'win', 'restarting'
+      this._gameState = 'firstPage'
 
-      // Get the custom element for a countdown timer.
-      this._timer = this.shadowRoot.querySelector('#timer')
+      // Wether the player won
+      this._playerWon = false
+
+      // Selecting custom elements from the template.
+      this._restartButton = this.shadowRoot.querySelector('#restartButton')
+      this._announcement = this.shadowRoot.querySelector('#announcement')
+      this._userForm = this.shadowRoot.querySelector('user-nickname')
+      this._timer = this.shadowRoot.querySelector('countdown-timer')
+      this._quiz = this.shadowRoot.querySelector('quiz-questions')
+      this._highscores = this.shadowRoot.querySelector('high-score')
 
       // Bindings for reaching this shadow.
       this._startQuestion = this._startQuestion.bind(this)
@@ -160,14 +171,45 @@ customElements.define('quiz-app',
      *
      */
     _startQuestion () {
-      // Hide form before the first question.
-      if (!this._userForm.classList.contains('hidden')) {
-        this._userForm.classList.add('hidden')
-      }
 
-      // Display the timer.
-      if (this._timer.classList.contains('hidden')) {
+    }
+
+    /**
+     * Call to render the game, changes depends on
+     * the current state of the game.
+     */
+    _renderGame () {
+      if (this._gameState === 'firstPage') {
+        // Hide the username form.
+        this._userForm.classList.add('hidden')
+
+        // Display the timer and quiz-questions.
         this._timer.classList.remove('hidden')
+        this._quiz.classList.remove('hidden')
+      } else if (this._gameState === 'gameover' || this._gameState === 'win') {
+        // Choose what to display in the announcement.
+        if (this._playerWon) {
+          this._announcement.textContent = 'You made it to the end!'
+        } else {
+          this._announcement.textContent = 'Game over!'
+        }
+
+        // Hide the timer and quiz-questions.
+        this._timer.classList.add('hidden')
+        this._quiz.classList.add('hidden')
+
+        // Display announcement, highscore and restart-button.
+        this._announcement.classList.remove('hidden')
+        this._highscores.classList.remove('hidden')
+        this._restartButton.classList.remove('hidden')
+      } else if (this._gameState === 'restarting') {
+        // Hide announcement, highscore and restart-button.
+        this._announcement.classList.add('hidden')
+        this._highscores.classList.add('hidden')
+        this._restartButton.classList.add('hidden')
+
+        // Display the username form.
+        this._userForm.classList.remove('hidden')
       }
     }
 
