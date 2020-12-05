@@ -55,6 +55,9 @@ customElements.define('countdown-timer',
       // Default time limit of 20 seconds.
       this._limit = 20
 
+      // How many times the countdown has been activated.
+      this._counter = 0
+
       // Get the div-element for displaying the counting number.
       this._counter = this.shadowRoot.querySelector('#counter')
 
@@ -103,6 +106,16 @@ customElements.define('countdown-timer',
     }
 
     /**
+     * Get the counter.
+     *
+     * @readonly
+     * @returns {number} - The counters current number.
+     */
+    get counter () {
+      return this._counter
+    }
+
+    /**
      * Stop the timer.
      *
      * @param {number} timer - The interval to stop.
@@ -121,7 +134,6 @@ customElements.define('countdown-timer',
      * which callbacks every 1 sec.
      */
     _countdown () {
-      let counter = 0
       let time = this._limit
 
       // First display of starting number.
@@ -129,8 +141,8 @@ customElements.define('countdown-timer',
 
       // Begin timer in an interval.
       const timer = setInterval(() => {
-        counter++
-        time = this._limit - counter
+        this._counter++
+        time = this._limit - this._counter
 
         // Stop the timer when reaching 0.
         if (time <= 0) {
