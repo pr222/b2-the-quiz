@@ -56,7 +56,7 @@ customElements.define('countdown-timer',
       this._limit = 20
 
       // How many times the countdown has been activated.
-      this._counter = 0
+      this._count = 0
 
       // Get the div-element for displaying the counting number.
       this._counter = this.shadowRoot.querySelector('#counter')
@@ -111,8 +111,8 @@ customElements.define('countdown-timer',
      * @readonly
      * @returns {number} - The counters current number.
      */
-    get counter () {
-      return this._counter
+    get count () {
+      return this._count
     }
 
     /**
@@ -141,8 +141,8 @@ customElements.define('countdown-timer',
 
       // Begin timer in an interval.
       const timer = setInterval(() => {
-        this._counter++
-        time = this._limit - this._counter
+        this._count++
+        time = this._limit - this._count
 
         // Stop the timer when reaching 0.
         if (time <= 0) {
