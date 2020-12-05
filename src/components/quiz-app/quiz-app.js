@@ -27,7 +27,7 @@ template.innerHTML = `
 
   <div>
     <h1>Quiz Time!</h1>
-    <input type="button" id="restartButton"  value="Restart">
+    <input type="button" id="restartButton" class="hidden" value="Restart">
     <h2 id="announcement"></h2>
   </div>
   <user-nickname></user-nickname>
@@ -80,6 +80,8 @@ customElements.define('quiz-app',
       // this._startQuestion = this._startQuestion.bind(this)
       // this._startGame = this._startGame.bind(this)
       this._newUser = this._newUser.bind(this)
+      this._gameover = this._gameover.bind(this)
+      this._resetGame = this._resetGame.bind(this)
     }
 
     /**
@@ -111,12 +113,11 @@ customElements.define('quiz-app',
       // if (!this.hasAttribute('message')) {
       //   this.setAttribute('message', 'A simple hello from a web component.')
       // }
-
       // this._upgradeProperty('message')
-      this._userForm.addEventListener('newUser', this._newUser)
-      // this._userForm.addEventListener('startQuestion', this._startQuestion)
 
-      // this._restartButton.addEventListener('click', this._resetGame)
+      this._userForm.addEventListener('newUser', this._newUser)
+      this._quiz.addEventListener('gameover', this._gameover)
+      this._restartButton.addEventListener('click', this._resetGame)
     }
 
     /**
@@ -124,6 +125,8 @@ customElements.define('quiz-app',
      */
     disconnectedCallback () {
       this._username.removeEventListener('newUser', this._newUser)
+      this._quiz.removeEventListener('gameover', this._gameover)
+      this._restartButton.addEventListener('click', this._resetGame)
     }
 
     /**
@@ -180,6 +183,32 @@ customElements.define('quiz-app',
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
 
       this._gameState = 'quiz'
+    }
+
+    /**
+     * When the game is over.
+     *
+     */
+    _gameover () {
+      console.log('GAME OVER!')
+
+      this._gameState = 'gameover'
+
+      this._renderGame()
+    }
+
+    /**
+     * Reset the game.
+     *
+     */
+    _resetGame () {
+      console.log('reset game')
+
+      this._gameState = 'restarting'
+
+      this._renderGame()
+
+      this._gameState = 'firstPage '
     }
 
     /**

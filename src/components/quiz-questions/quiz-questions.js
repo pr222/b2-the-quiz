@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-const apiUrl = 'http://courselab.lnu.se/question/1'
+const firstUrl = 'http://courselab.lnu.se/question/1'
 
 /**
  * Define the template.
@@ -56,13 +56,12 @@ customElements.define('quiz-questions',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
-      // Get the header element for displaying the question.
+      // Placeholder for the next url to GET or POST.
+      this._nextURL = ''
+
+      // Get the elements of this template.
       this._question = this.shadowRoot.querySelector('#question')
-
-      // Get the text input field of the form.
       this._answerInput = this.shadowRoot.querySelector('#answerInput')
-
-      // Get the form element for listening to the submit event.
       this._submitAnswer = this.shadowRoot.querySelector('#answerForm')
 
       // Binding for _onSubmit to reach this.
@@ -113,32 +112,22 @@ customElements.define('quiz-questions',
      * @param {Event} event -
      */
     async _startQuestion (event) {
-      const question1 = await this._getQuestion(apiUrl)
+      console.log('_startQuestion began')
+      let request
 
-      const question2 = question1.question
-      const url = question1.nextURL
-      console.log(url)
-      this._displayQuestion(question2)
+      if (this._nextURL === '') {
+        console.log('if')
+        request = await this._getQuestion(firstUrl)
+      } else {
+        console.log('else')
+        request = await this._getQuestion(this._nextURL)
+      }
 
-      // // // // // // // // // // // // // // // // // // // //
-      const answer = { answer: this._answerInput.value }
-      // console.log(answer)
-      const jsonAnswer =JSON.stringify(answer)
-      console.log(jsonAnswer)
-      // const answer = this._answerInput.value
-      
-      // POST ANSWER
-      const postAnswer = await fetch(`${url}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: jsonAnswer
-      })
+      const question = request.question
+      this._displayQuestion(question)
 
-      const body = await postAnswer.json()
-      console.log(body)
-      // // // // // // // // // // // // // // // // // // // //
+      this._nextURL = request.nextURL
+      console.log(`Next url: ${this._nextURL}`)
     }
 
     /**
@@ -193,10 +182,9 @@ customElements.define('quiz-questions',
       const body = await postAnswer.json()
       console.log(body)
 
-      // if (!postAnswer.ok) {
-      //   const message = `Oops, an error: ${postAnswer.status}`
-      //   throw new Error(message)
-      // }
+      if (!postAnswer.ok) {
+        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true }))
+      }
       // // // // // // // // // // // // // // // // // // // //
 
 
