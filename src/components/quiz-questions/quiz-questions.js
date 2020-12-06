@@ -59,6 +59,9 @@ customElements.define('quiz-questions',
       // Placeholder for the next url to GET or POST.
       this._nextURL = ''
 
+      // The current question to use.
+      this._currentQuestion = ''
+
       // Get the elements of this template.
       this._question = this.shadowRoot.querySelector('#question')
       this._answerInput = this.shadowRoot.querySelector('#answerInput')
@@ -68,6 +71,23 @@ customElements.define('quiz-questions',
       this._onSubmit = this._onSubmit.bind(this)
       this._startQuestion = this._startQuestion.bind(this)
     }
+
+    // get currentQuestion () {
+    //   return this._currentQuestion
+    // }
+
+    get nextURL () {
+      return this._nextURL
+    }
+
+    // set currentQuestion (value) {
+    //   this._currentQuestion = value
+    // }
+
+    set nextURL (value) {
+      this._nextURL = value
+    }
+
 
     /**
      * Looks out for changes in attributes.
@@ -113,6 +133,15 @@ customElements.define('quiz-questions',
      */
     async _startQuestion (event) {
       console.log('_startQuestion began')
+      // // Has the last question been executed already?
+      // if (this._nextURL === undefined) {
+      //   console.log('You win!')
+      //   this.dispatchEvent(new CustomEvent('win', { bubbles: true }))
+      //   return
+      // }
+
+      this._answerInput.focus()
+
       let request
 
       if (this._nextURL === '') {
@@ -125,6 +154,7 @@ customElements.define('quiz-questions',
 
       const question = request.question
       this._displayQuestion(question)
+      this._displayAnswerOptions(request)
 
       this._nextURL = request.nextURL
       console.log(`Next url: ${this._nextURL}`)
@@ -155,6 +185,44 @@ customElements.define('quiz-questions',
     // })
 
     /**
+     * Doing the POST request.
+     *
+     * @param {object} - Submitted answer in JSON.
+     */
+    async _postAnswer (answer) {
+      const postAnswer = await fetch(`${this._nextURL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: answer
+      })
+      console.log(postAnswer)
+
+      if (postAnswer.ok) {
+        console.log('status ok')
+        const body = await postAnswer.json()
+        console.log(body)
+
+        this._nextURL = body.nextURL
+        console.log(`Next url: ${this._nextURL}`)
+
+        // When status is OK but next url is undefined, 
+        // there are no more questions to get and the
+        // player has therefore won.
+        if (this._nextURL === undefined) {
+          this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
+        } else {
+          this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+        }
+        return body
+      } else {
+        console.log('status not ok')
+        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
+      }      
+    }
+    
+    /**
      * Take care of submit answer-event.
      *
      * @param {Event} event - submit the answer.
@@ -163,33 +231,18 @@ customElements.define('quiz-questions',
       // Prevent default posting of form submission.
       event.preventDefault()
 
+      // Extract answer from event and convert to JSON.
       const answer = { answer: this._answerInput.value }
-      // console.log(answer)
       const jsonAnswer =JSON.stringify(answer)
       console.log(jsonAnswer)
-      // const answer = this._answerInput.value
 
-      // // // // // // // // // // // // // // // // // // // //
-      // POST ANSWER
-      const postAnswer = await fetch('http://courselab.lnu.se/answer/1', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: jsonAnswer
-      })
+      // Post the answer to the server.
+      const post = await this._postAnswer(jsonAnswer)
 
-      const body = await postAnswer.json()
-      console.log(body)
-
-      if (!postAnswer.ok) {
-        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true }))
-      }
-      // // // // // // // // // // // // // // // // // // // //
-
-
+      // Clean up input field.
+      this._answerInput.value = ''
+      this._answerInput.focus()
     }
-    //
 
     /**
      * Display current question.
@@ -202,6 +255,14 @@ customElements.define('quiz-questions',
       }
 
       this._question.textContent = question
+    }
+
+    _displayAnswerOptions (questionRequest) {
+     if (questionRequest.alternatives) {
+      console.log('DISPLAY BUTTONS!')
+     } else {
+       console.log('DISPLAY TEXTFIELD!')
+     }
     }
   }
 )

@@ -117,6 +117,7 @@ customElements.define('quiz-app',
 
       this._userForm.addEventListener('newUser', this._newUser)
       this._quiz.addEventListener('gameover', this._gameover)
+      this._quiz.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
     }
 
@@ -126,6 +127,7 @@ customElements.define('quiz-app',
     disconnectedCallback () {
       this._username.removeEventListener('newUser', this._newUser)
       this._quiz.removeEventListener('gameover', this._gameover)
+      this._quiz.removeEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
     }
 
@@ -165,15 +167,11 @@ customElements.define('quiz-app',
       sessionStorage.setItem(`user_${id}`, asJSON)
       // console.log(sessionStorage.getItem(`user_${id}`))
 
-      // this._userForm.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
-
       this._startGame()
-
-      //
     }
 
     /**
-     * Switch to show questions.
+     * Start the game.
      *
      */
     _startGame () {
@@ -185,14 +183,24 @@ customElements.define('quiz-app',
       this._gameState = 'quiz'
     }
 
+
+
     /**
      * When the game is over.
      *
+     * @param {Event} event - Game over
      */
-    _gameover () {
-      console.log('GAME OVER!')
+    _gameover (event) {
+      if (event.type === 'gameover') {
+        console.log('GAME OVER!!!')
+        this._gameState = 'gameover'
+      } else if (event.type === 'win') {
+        console.log('WIN!')
+        this._gameState = 'win'
+        this._playerWon = true
+      }
 
-      this._gameState = 'gameover'
+      // Update highscore
 
       this._renderGame()
     }
@@ -205,10 +213,11 @@ customElements.define('quiz-app',
       console.log('reset game')
 
       this._gameState = 'restarting'
+      this._quiz.nextURL = ''
+      this._playerWon = false
 
       this._renderGame()
-
-      this._gameState = 'firstPage '
+      this._gameState = 'firstPage'
     }
 
     /**
