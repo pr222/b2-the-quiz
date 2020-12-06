@@ -34,9 +34,6 @@ template.innerHTML = `
   <countdown-timer class="hidden" limit="70"></countdown-timer>
   <quiz-questions class="hidden"></quiz-questions>
   <high-score class="hidden"></high-score>
-
-  <!-- <div class="message-board">
-  </div>  -->
 `
 
 /**
@@ -52,23 +49,19 @@ customElements.define('quiz-app',
      */
     constructor () {
       super()
-
       // Attach a shadow DOM tree to this element and
       // append the template to the shadow root.
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
-      // Get the message board element in the shadow root.
-      this._messageBoard = this.shadowRoot.querySelector('.message-board')
-
-      // 'firstPage' as default state of the page.
-      // Other states: ¿'quiz'?, 'gameover', 'win', 'restarting'
+      // Default state of the page as 'firstPage'.
+      // Other states: ¿'quiz'?, 'gameover', 'win' & 'restarting'
       this._gameState = 'firstPage'
 
-      // Wether the player won
+      // Wether the player won.
       this._playerWon = false
 
-      // Selecting custom elements from the template.
+      // Selecting custom elements from the template in shadow root.
       this._restartButton = this.shadowRoot.querySelector('#restartButton')
       this._announcement = this.shadowRoot.querySelector('#announcement')
       this._userForm = this.shadowRoot.querySelector('user-nickname')
@@ -110,11 +103,6 @@ customElements.define('quiz-app',
      * Called after the element is inserted into the DOM.
      */
     connectedCallback () {
-      // if (!this.hasAttribute('message')) {
-      //   this.setAttribute('message', 'A simple hello from a web component.')
-      // }
-      // this._upgradeProperty('message')
-
       this._userForm.addEventListener('newUser', this._newUser)
       this._quiz.addEventListener('gameover', this._gameover)
       this._quiz.addEventListener('win', this._gameover)
@@ -134,20 +122,23 @@ customElements.define('quiz-app',
     /**
      * Takes care of event when user submits its name.
      *
-     * @param {Event} event - When user has confimed its nickname.
+     * @param {Event} event - When user has submitted its nickname.
      */
     _newUser (event) {
       console.log('New user here!')
       // Get the information obtained by the form from user-nickname.
       const newUser = event.detail.username
-      // console.log(newUser)
-      this._createUser(newUser)
+
+      const currentUser = this._createUser(newUser)
+
+      this._startGame(currentUser)
     }
 
     /**
      * Register a new user.
      *
      * @param {string} newUser - The nickname of the new user.
+     * @returns {object} - The new user in JSON.
      */
     _createUser (newUser) {
       // Create a new user object.
@@ -164,31 +155,31 @@ customElements.define('quiz-app',
       // Although not the perfect serialization since other
       // things also gets saved in the web storage.
       const id = sessionStorage.length + 1
+
+      // Save user in web storage.
       sessionStorage.setItem(`user_${id}`, asJSON)
       // console.log(sessionStorage.getItem(`user_${id}`))
 
-      this._startGame()
+      return asJSON
     }
 
     /**
      * Start the game.
      *
+     * @param {object} user - The current user in JSON.
      */
-    _startGame () {
+    _startGame (user) {
       this._renderGame()
+      this._gameState = 'quiz'
 
       this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
-
-      this._gameState = 'quiz'
     }
 
-
-
     /**
-     * When the game is over.
+     * Update conditions for when the game is over.
      *
-     * @param {Event} event - Game over
+     * @param {Event} event - Gameover, losing or winning.
      */
     _gameover (event) {
       if (event.type === 'gameover') {
@@ -200,7 +191,7 @@ customElements.define('quiz-app',
         this._playerWon = true
       }
 
-      // Update highscore
+      // Update highscore!
 
       this._renderGame()
     }
@@ -208,21 +199,24 @@ customElements.define('quiz-app',
     /**
      * Reset the game.
      *
+     * @param {Event} event - Click event to reset game.
      */
-    _resetGame () {
+    _resetGame (event) {
       console.log('reset game')
-
       this._gameState = 'restarting'
+
+      // Properties to reset.
       this._quiz.nextURL = ''
       this._playerWon = false
 
+      // Render and then reset the state to default.
       this._renderGame()
       this._gameState = 'firstPage'
     }
 
     /**
-     * Call to render the game, changes depends on
-     * the current state of the game.
+     * Render the game, with changes that depends
+     * on the current state of the game.
      */
     _renderGame () {
       if (this._gameState === 'firstPage') {
@@ -257,49 +251,6 @@ customElements.define('quiz-app',
         // Display the username form.
         this._userForm.classList.remove('hidden')
       }
-    }
-
-    // // // // // // // // // // // // // // // // // // // //
-
-    /**
-     * Run the specified instance property
-     * through the class setter.
-     *
-     * @param {string} prop - The property's name.
-     */
-    _upgradeProperty (prop) {
-      if (Object.hasOwnProperty.call(this, prop)) {
-        const value = this[prop]
-        delete this[prop]
-        this[prop] = value
-      }
-    }
-
-    /**
-     * Gets the message.
-     *
-     * @returns {string} The message value.
-     */
-    get message () {
-      return this.getAttribute('message')
-    }
-
-    /**
-     * Sets the message.
-     *
-     * @param {string} value - The message.
-     */
-    set message (value) {
-      if (this.message !== value) {
-        this.setAttribute('message', value)
-      }
-    }
-
-    /**
-     * Cleans the message board.
-     */
-    clean () {
-      this._messageBoard.textContent = ''
     }
   }
 )

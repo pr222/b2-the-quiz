@@ -26,15 +26,34 @@ template.innerHTML = `
     text-align: center;
     margin-top: 10px;
   }
+
+  :host ul {
+    text-align: left;
+  }
+
+  :host li {
+    list-style: none;
+    padding: 2px;
+  }
+
+  .hidden {
+    display: none;
+  }
 </style>
 
 <div>
   <h1 id="question">Question</h1>
 
   <form id="answerForm">
-    <label for="answerInput">Answer: </label>
-    <input type="text" id="answerInput" name="answerInput" autofocus autocomplete="off">
+    
+    <div id="radioButtons" class="hidden">
+    </div>
+    <div id="textAnswer">
+      <label for="answerInput">Answer: </label>
+      <input type="text" id="answerInput" name="answerInput" autofocus autocomplete="off">
+    </div>
     <input type="submit" value="Send answer">
+    
   </form>
 </div>
 `
@@ -65,6 +84,8 @@ customElements.define('quiz-questions',
       // Get the elements of this template.
       this._question = this.shadowRoot.querySelector('#question')
       this._answerInput = this.shadowRoot.querySelector('#answerInput')
+      this._radioButtons = this.shadowRoot.querySelector('#radioButtons')
+      this._textDiv = this.shadowRoot.querySelector('#textAnswer')
       this._submitAnswer = this.shadowRoot.querySelector('#answerForm')
 
       // Binding for _onSubmit to reach this.
@@ -121,7 +142,6 @@ customElements.define('quiz-questions',
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
-      //
       window.removeEventListener('startQuestion', this._startQuestion)
       this._submitAnswer.removeEventListener('submit', this._onSubmit)
     }
@@ -231,8 +251,21 @@ customElements.define('quiz-questions',
       // Prevent default posting of form submission.
       event.preventDefault()
 
+      let chosenAnswer
+
+      if (this._answerInput.value.length > 0) {
+        console.log('TEXT INPUT VALUE')
+        chosenAnswer = this._answerInput.value
+        console.log(chosenAnswer)
+      } else {
+        console.log('RADIO BUTT VAL')
+        // RADIO BUTTON chosenAnswer 
+        chosenAnswer = this._submitAnswer.option.value
+        console.log(chosenAnswer)
+      }
+
       // Extract answer from event and convert to JSON.
-      const answer = { answer: this._answerInput.value }
+      const answer = { answer: chosenAnswer }
       const jsonAnswer =JSON.stringify(answer)
       console.log(jsonAnswer)
 
@@ -258,11 +291,44 @@ customElements.define('quiz-questions',
     }
 
     _displayAnswerOptions (questionRequest) {
-     if (questionRequest.alternatives) {
-      console.log('DISPLAY BUTTONS!')
-     } else {
-       console.log('DISPLAY TEXTFIELD!')
-     }
+      if (questionRequest.alternatives) {
+        console.log('DISPLAY BUTTONS!')
+        this._radioButtons.classList.remove('hidden')
+        this._textDiv.classList.add('hidden')
+
+        this._radioButtons.textContent = 'Choose one option: '
+
+        // Remove previous radio buttons.
+        while (this._radioButtons.firstElementChild) {
+          this._radioButtons.removeChild(this._submitAnswer.lastChild)
+        }
+
+        const options = questionRequest.alternatives
+        console.log(options)
+        const ul = document.createElement('ul')
+
+        for (let [key, value] of Object.entries(options)) {
+          const radioButton = document.createElement('input')
+          radioButton.setAttribute('type', 'radio')
+          radioButton.setAttribute('name', 'option')
+          radioButton.setAttribute('id', `${key}`)
+          radioButton.setAttribute('value', `${key}`)
+
+          const label = document.createElement('label')
+          label.setAttribute('for', `${key}`)
+          label.textContent = value
+
+          const li = document.createElement('li')
+          li.appendChild(radioButton)
+          li.appendChild(label)
+          ul.appendChild(li)
+        }
+        this._radioButtons.appendChild(ul)
+      } else {
+        console.log('DISPLAY TEXTFIELD!')
+        this._textDiv.classList.remove('hidden')
+        this._radioButtons.classList.add('hidden')
+      }
     }
   }
 )
