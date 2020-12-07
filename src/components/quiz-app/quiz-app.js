@@ -31,7 +31,7 @@ template.innerHTML = `
     <h2 id="announcement"></h2>
   </div>
   <user-nickname></user-nickname>
-  <countdown-timer class="hidden" limit="70"></countdown-timer>
+  <countdown-timer class="hidden"></countdown-timer>
   <quiz-questions class="hidden"></quiz-questions>
   <high-score class="hidden"></high-score>
 `
@@ -172,6 +172,7 @@ customElements.define('quiz-app',
       this._renderGame()
       this._gameState = 'quiz'
 
+      // _startQuestion()
       this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
     }

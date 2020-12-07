@@ -91,12 +91,18 @@ customElements.define('quiz-questions',
       // Binding for _onSubmit to reach this.
       this._onSubmit = this._onSubmit.bind(this)
       this._startQuestion = this._startQuestion.bind(this)
+      this._displayAnswerOptions = this._displayAnswerOptions.bind(this)
     }
 
     // get currentQuestion () {
     //   return this._currentQuestion
     // }
 
+    /**
+     * Getter for this nextURL.
+     *
+     * @returns {string} - The next URL to use.
+     */
     get nextURL () {
       return this._nextURL
     }
@@ -105,10 +111,14 @@ customElements.define('quiz-questions',
     //   this._currentQuestion = value
     // }
 
+    /**
+     * Setter for this nextURL.
+     *
+     * @param {string} value - The new value for next URL.
+     */
     set nextURL (value) {
       this._nextURL = value
     }
-
 
     /**
      * Looks out for changes in attributes.
@@ -207,15 +217,16 @@ customElements.define('quiz-questions',
     /**
      * Doing the POST request.
      *
-     * @param {object} - Submitted answer in JSON.
+     * @param {object} answer - Submitted answer in JSON.
+     * @returns {object} - The response object in JSON.
      */
     async _postAnswer (answer) {
       const postAnswer = await fetch(`${this._nextURL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: answer
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: answer
       })
       console.log(postAnswer)
 
@@ -227,7 +238,7 @@ customElements.define('quiz-questions',
         this._nextURL = body.nextURL
         console.log(`Next url: ${this._nextURL}`)
 
-        // When status is OK but next url is undefined, 
+        // When status is OK but next url is undefined,
         // there are no more questions to get and the
         // player has therefore won.
         if (this._nextURL === undefined) {
@@ -239,9 +250,9 @@ customElements.define('quiz-questions',
       } else {
         console.log('status not ok')
         this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
-      }      
+      }
     }
-    
+
     /**
      * Take care of submit answer-event.
      *
@@ -255,22 +266,22 @@ customElements.define('quiz-questions',
 
       if (this._answerInput.value.length > 0) {
         console.log('TEXT INPUT VALUE')
-        chosenAnswer = this._answerInput.value
+        chosenAnswer = this._answerInput.value.toLowerCase()
         console.log(chosenAnswer)
       } else {
         console.log('RADIO BUTT VAL')
-        // RADIO BUTTON chosenAnswer 
+        // RADIO BUTTON chosenAnswer
         chosenAnswer = this._submitAnswer.option.value
         console.log(chosenAnswer)
       }
 
       // Extract answer from event and convert to JSON.
       const answer = { answer: chosenAnswer }
-      const jsonAnswer =JSON.stringify(answer)
+      const jsonAnswer = JSON.stringify(answer)
       console.log(jsonAnswer)
 
       // Post the answer to the server.
-      const post = await this._postAnswer(jsonAnswer)
+      await this._postAnswer(jsonAnswer)
 
       // Clean up input field.
       this._answerInput.value = ''
@@ -283,6 +294,7 @@ customElements.define('quiz-questions',
      * @param {*} question - The question to display.
      */
     _displayQuestion (question) {
+      // Clean up from previous question.
       if (this._question.textContent > 0) {
         this._question.textContent = ''
       }
@@ -290,44 +302,62 @@ customElements.define('quiz-questions',
       this._question.textContent = question
     }
 
+    /**
+     * Display ways of answering a question.
+     *
+     * @param {object} questionRequest - If present, an object with options to answer.
+     */
     _displayAnswerOptions (questionRequest) {
-      if (questionRequest.alternatives) {
-        console.log('DISPLAY BUTTONS!')
-        this._radioButtons.classList.remove('hidden')
-        this._textDiv.classList.add('hidden')
-
-        this._radioButtons.textContent = 'Choose one option: '
-
-        // Remove previous radio buttons.
-        while (this._radioButtons.firstElementChild) {
-          this._radioButtons.removeChild(this._submitAnswer.lastChild)
-        }
-
-        const options = questionRequest.alternatives
-        console.log(options)
-        const ul = document.createElement('ul')
-
-        for (let [key, value] of Object.entries(options)) {
-          const radioButton = document.createElement('input')
-          radioButton.setAttribute('type', 'radio')
-          radioButton.setAttribute('name', 'option')
-          radioButton.setAttribute('id', `${key}`)
-          radioButton.setAttribute('value', `${key}`)
-
-          const label = document.createElement('label')
-          label.setAttribute('for', `${key}`)
-          label.textContent = value
-
-          const li = document.createElement('li')
-          li.appendChild(radioButton)
-          li.appendChild(label)
-          ul.appendChild(li)
-        }
-        this._radioButtons.appendChild(ul)
-      } else {
+      if (!questionRequest.alternatives) {
         console.log('DISPLAY TEXTFIELD!')
+        // Hide and show relevant element in form.
         this._textDiv.classList.remove('hidden')
         this._radioButtons.classList.add('hidden')
+      } else {
+        console.log('DISPLAY BUTTONS!')
+        // Get how many of the options there are present.
+        const options = questionRequest.alternatives
+        console.log(options)
+        const howMany = Object.keys(options).length
+        console.log(howMany)
+
+        // Only show radio button-options if they are within reasonable amount.
+        if (howMany > 2 && howMany < 10) {
+          // First, remove previous radio buttons.
+          while (this._radioButtons.firstElementChild) {
+            this._radioButtons.removeChild(this._radioButtons.lastChild)
+          }
+          // Then, hide and show relevant element in form.
+          this._radioButtons.classList.remove('hidden')
+          this._textDiv.classList.add('hidden')
+
+          // Add a call-to-action-text.
+          this._radioButtons.textContent = 'Choose one option: '
+
+          // Create a list to fill with options.
+          const ul = document.createElement('ul')
+
+          // Create a radio-button in a list element for each option.
+          for (const [key, value] of Object.entries(options)) {
+            const radioButton = document.createElement('input')
+            radioButton.setAttribute('type', 'radio')
+            radioButton.setAttribute('name', 'option')
+            radioButton.setAttribute('id', `${key}`)
+            radioButton.setAttribute('value', `${key}`)
+
+            const label = document.createElement('label')
+            label.setAttribute('for', `${key}`)
+            label.textContent = value
+
+            const li = document.createElement('li')
+            li.appendChild(radioButton)
+            li.appendChild(label)
+            ul.appendChild(li)
+          }
+
+          // Lastly, add the list into the form.
+          this._radioButtons.appendChild(ul)
+        }
       }
     }
   }
