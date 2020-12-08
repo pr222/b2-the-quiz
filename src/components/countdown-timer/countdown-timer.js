@@ -5,6 +5,8 @@
  * @version 1.0.0
  */
 
+let timer
+
 /**
  * Define the template.
  */
@@ -64,6 +66,8 @@ customElements.define('countdown-timer',
       // Bindings for reaching the this._limit-property.
       this._countdown = this._countdown.bind(this)
       this._displayTime = this._displayTime.bind(this)
+      this._reset = this._reset.bind(this)
+      this._stopTimer = this._stopTimer.bind(this)
     }
 
     /**
@@ -85,7 +89,11 @@ customElements.define('countdown-timer',
     attributeChangedCallback (name, oldValue, newValue) {
       //
       if (name === 'limit') {
-        this._limit = newValue
+        if (newValue === '') {
+          this._limit = 20
+        } else {
+          this._limit = newValue
+        }
       }
     }
 
@@ -94,7 +102,7 @@ customElements.define('countdown-timer',
      */
     connectedCallback () {
       window.addEventListener('startTimer', this._countdown)
-      window.addEventListener('stopTimer', this._reset)
+      window.addEventListener('stopTimer', this._stopTimer)
     }
 
     /**
@@ -102,7 +110,7 @@ customElements.define('countdown-timer',
      */
     disconnectedCallback () {
       window.removeEventListener('startTimer', this._countdown)
-      window.removeEventListener('stopTimer', this._reset)
+      window.removeEventListener('stopTimer', this._stopTimer)
     }
 
     /**
@@ -118,18 +126,33 @@ customElements.define('countdown-timer',
     /**
      * Stop the timer.
      *
-     * @param {number} timer - The interval to stop.
-     * @returns {object} - Reference to itself.
-     *
+     * @param {Event} event - To stop the timer.
      */
-    _reset (timer) {
+    _stopTimer (event) {
+      console.log('stopTimer' + timer)
       clearInterval(timer)
-      console.log('clearing countdown timer')
+      timer = null
+      console.log('Timer stopped?' + timer)
+      this._reset()
+    }
+
+    /**
+     * Reset the timer.
+     *
+     * @returns {object} - Reference to itself.
+     */
+    _reset () {
+      console.log('resetting countdown timer')
       console.log('limit ' + this._limit)
       console.log('counter ' + this._count)
+
+      console.log('EVENT send from timer: Stopped')
       this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._counter } }))
 
       this._count = 0
+      console.log('limit ' + this._limit)
+      console.log('counter ' + this._count)
+      console.log('end of clearing ' + timer)
       return this
     }
 
@@ -140,23 +163,27 @@ customElements.define('countdown-timer',
      * @param {Event} event - Starting the countdown.
      */
     _countdown (event) {
+      console.log('EVENT began in timer: start timer')
       let time = this._limit
-
+      console.log('The limit for this question: ' + this._limit)
       // First display of starting number.
       this._displayTime(time)
 
+      console.log('START INTERVAL')
       // Begin timer in an interval.
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
+        console.log(timer)
+        console.log('an interval')
         this._count++
         time = this._limit - this._count
 
         // Stop the timer when reaching 0.
         if (time <= 0) {
-          this._reset(timer)
+          this._stopTimer()
+        } else {
+          // If timer was not stopped, render the number.
+          this._displayTime(time)
         }
-
-        // If timer was not stopped, render the number.
-        this._displayTime(time)
       }, 1000)
     }
 

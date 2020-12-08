@@ -84,7 +84,7 @@ customElements.define('quiz-app',
     connectedCallback () {
       this._userForm.addEventListener('newUser', this._newUser)
       this._quiz.addEventListener('questionOK', this._questionReceived)
-      this._quiz.addEventListener('answerHandled', this._prepareNextQuestion)
+      this._quiz.addEventListener('answerOK', this._answerOK)
       this._quiz.addEventListener('gameover', this._gameover)
       this._quiz.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
@@ -152,7 +152,9 @@ customElements.define('quiz-app',
     _startGame (user) {
       this._renderGame()
       this._gameState = 'quiz'
-      this._prepareNextQuestion()
+
+      console.log('EVENT sent from app: startQuestion')
+      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
     }
 
     /**
@@ -162,14 +164,12 @@ customElements.define('quiz-app',
      */
     _questionReceived (event) {
       console.log(event.detail)
-      if (event.detail.currentQuestion) {
-        let limitNumber = event.detail
-        limitNumber = Object.values(limitNumber)
-        this._timer.setAttribute('limit', `${limitNumber}`)
-      } else {
-        this._timer.removeAttribute('limit')
-      }
 
+      let limitNumber = event.detail
+      limitNumber = Object.values(limitNumber)
+      this._timer.setAttribute('limit', `${limitNumber}`)
+
+      console.log('EVENT from app: start timer')
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
     }
 
@@ -180,11 +180,13 @@ customElements.define('quiz-app',
      *
      * @param {Event} event - If event present, prevoius answer is handled and ready for next question.
      */
-    _prepareNextQuestion (event) {
+    _answerOK (event) {
+      console.log('EVENT from app: stop timer')
       this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
 
       // Handle score saving.
 
+      console.log('EVENT from app: startQuestion')
       this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
     }
 
@@ -219,6 +221,8 @@ customElements.define('quiz-app',
       this._playerWon = false
 
       this.dispatchEvent(new CustomEvent('resetQuestion', { bubbles: true, composed: true }))
+      // Placeholder stop-event before switching to gameover:
+      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
 
       // Render and then reset the state to default.
       this._renderGame()

@@ -173,7 +173,7 @@ customElements.define('quiz-questions',
       if (this._nextURL === undefined) {
         this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
       } else {
-        this.dispatchEvent(new CustomEvent('answerHandled', { bubbles: true, composed: true }))
+        this.dispatchEvent(new CustomEvent('answerOK', { bubbles: true, composed: true }))
       }
 
       // Clean up input field.
