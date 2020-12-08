@@ -73,30 +73,9 @@ customElements.define('quiz-app',
       // this._startQuestion = this._startQuestion.bind(this)
       // this._startGame = this._startGame.bind(this)
       this._newUser = this._newUser.bind(this)
+      this._questionReceived = this._questionReceived.bind(this)
       this._gameover = this._gameover.bind(this)
       this._resetGame = this._resetGame.bind(this)
-    }
-
-    /**
-     * Attributes to monitor for changes.
-     *
-     * @returns {string[]} A string array of attributes to monitor.
-     */
-    static get observedAttributes () {
-      return ['message']
-    }
-
-    /**
-     * Called when observed attribute(s) changes.
-     *
-     * @param {string} name - The attribute's name.
-     * @param {*} oldValue - The old value.
-     * @param {*} newValue - The new value.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
-      if (name === 'message') {
-      //   this._messageBoard.textContent = newValue
-      }
     }
 
     /**
@@ -104,6 +83,8 @@ customElements.define('quiz-app',
      */
     connectedCallback () {
       this._userForm.addEventListener('newUser', this._newUser)
+      this._quiz.addEventListener('questionOK', this._questionReceived)
+      this._quiz.addEventListener('answerHandled', this._prepareNextQuestion)
       this._quiz.addEventListener('gameover', this._gameover)
       this._quiz.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
@@ -171,10 +152,40 @@ customElements.define('quiz-app',
     _startGame (user) {
       this._renderGame()
       this._gameState = 'quiz'
+      this._prepareNextQuestion()
+    }
 
-      // _startQuestion()
-      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+    /**
+     * Handle event when all went well with getting question.
+     *
+     * @param {Event} event - Event with information of time limit.
+     */
+    _questionReceived (event) {
+      console.log(event.detail)
+      if (event.detail.currentQuestion) {
+        let limitNumber = event.detail
+        limitNumber = Object.values(limitNumber)
+        this._timer.setAttribute('limit', `${limitNumber}`)
+      } else {
+        this._timer.removeAttribute('limit')
+      }
+
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
+    }
+
+    /**
+     * Prepare next question.
+     *
+     * From event: The answer is processed, ready for next question
+     *
+     * @param {Event} event - If event present, prevoius answer is handled and ready for next question.
+     */
+    _prepareNextQuestion (event) {
+      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
+
+      // Handle score saving.
+
+      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
     }
 
     /**
@@ -205,10 +216,9 @@ customElements.define('quiz-app',
     _resetGame (event) {
       console.log('reset game')
       this._gameState = 'restarting'
-
-      // Properties to reset.
-      this._quiz.nextURL = ''
       this._playerWon = false
+
+      this.dispatchEvent(new CustomEvent('resetQuestion', { bubbles: true, composed: true }))
 
       // Render and then reset the state to default.
       this._renderGame()

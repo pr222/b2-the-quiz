@@ -5,8 +5,6 @@
  * @version 1.0.0
  */
 
-const firstUrl = 'http://courselab.lnu.se/question/1'
-
 /**
  * Define the template.
  */
@@ -75,8 +73,8 @@ customElements.define('quiz-questions',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
-      // Placeholder for the next url to GET or POST.
-      this._nextURL = ''
+      // The next url to GET or POST.
+      this._nextURL = 'http://courselab.lnu.se/question/1'
 
       // The current question to use.
       this._currentQuestion = ''
@@ -91,53 +89,8 @@ customElements.define('quiz-questions',
       // Binding for _onSubmit to reach this.
       this._onSubmit = this._onSubmit.bind(this)
       this._startQuestion = this._startQuestion.bind(this)
+      this._resetQuestion = this._resetQuestion.bind(this)
       this._displayAnswerOptions = this._displayAnswerOptions.bind(this)
-    }
-
-    // get currentQuestion () {
-    //   return this._currentQuestion
-    // }
-
-    /**
-     * Getter for this nextURL.
-     *
-     * @returns {string} - The next URL to use.
-     */
-    get nextURL () {
-      return this._nextURL
-    }
-
-    // set currentQuestion (value) {
-    //   this._currentQuestion = value
-    // }
-
-    /**
-     * Setter for this nextURL.
-     *
-     * @param {string} value - The new value for next URL.
-     */
-    set nextURL (value) {
-      this._nextURL = value
-    }
-
-    /**
-     * Looks out for changes in attributes.
-     *
-     * @returns {string[]} - An array with stings of the attibutes.
-     */
-    static get observedAttributes () {
-      return ['']
-    }
-
-    /**
-     * Called by the browser when an attribute is changed.
-     *
-     * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
-      //
     }
 
     /**
@@ -145,6 +98,7 @@ customElements.define('quiz-questions',
      */
     connectedCallback () {
       window.addEventListener('startQuestion', this._startQuestion)
+      window.addEventListener('resetQuestion', this._resetQuestion)
       this._submitAnswer.addEventListener('submit', this._onSubmit)
     }
 
@@ -163,24 +117,11 @@ customElements.define('quiz-questions',
      */
     async _startQuestion (event) {
       console.log('_startQuestion began')
-      // // Has the last question been executed already?
-      // if (this._nextURL === undefined) {
-      //   console.log('You win!')
-      //   this.dispatchEvent(new CustomEvent('win', { bubbles: true }))
-      //   return
-      // }
+      console.log(this._nextURL)
 
       this._answerInput.focus()
 
-      let request
-
-      if (this._nextURL === '') {
-        console.log('if')
-        request = await this._getQuestion(firstUrl)
-      } else {
-        console.log('else')
-        request = await this._getQuestion(this._nextURL)
-      }
+      const request = await this._getQuestion(this._nextURL)
 
       const question = request.question
       this._displayQuestion(question)
@@ -188,69 +129,8 @@ customElements.define('quiz-questions',
 
       this._nextURL = request.nextURL
       console.log(`Next url: ${this._nextURL}`)
-    }
 
-    /**
-     * Doing the GET request.
-     *
-     * @param {*} url -
-     * @returns {Promise<object>} - a response in JSON.
-     */
-    async _getQuestion (url) {
-      const response = await fetch(`${url}`)
-      console.log(response)
-
-      if (!response.ok) {
-        const message = `Oops, an error: ${response.status}`
-        throw new Error(message)
-      }
-
-      const body = await response.json()
-      console.log(body)
-      return body
-    }
-
-    // _getGuestion().catch(error => {
-    //   error.message
-    // })
-
-    /**
-     * Doing the POST request.
-     *
-     * @param {object} answer - Submitted answer in JSON.
-     * @returns {object} - The response object in JSON.
-     */
-    async _postAnswer (answer) {
-      const postAnswer = await fetch(`${this._nextURL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: answer
-      })
-      console.log(postAnswer)
-
-      if (postAnswer.ok) {
-        console.log('status ok')
-        const body = await postAnswer.json()
-        console.log(body)
-
-        this._nextURL = body.nextURL
-        console.log(`Next url: ${this._nextURL}`)
-
-        // When status is OK but next url is undefined,
-        // there are no more questions to get and the
-        // player has therefore won.
-        if (this._nextURL === undefined) {
-          this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
-        } else {
-          this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
-        }
-        return body
-      } else {
-        console.log('status not ok')
-        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
-      }
+      this.dispatchEvent(new CustomEvent('questionOK', { bubbles: true, composed: true, detail: { currentQuestion: request.limit } }))
     }
 
     /**
@@ -281,17 +161,85 @@ customElements.define('quiz-questions',
       console.log(jsonAnswer)
 
       // Post the answer to the server.
-      await this._postAnswer(jsonAnswer)
+      const postedAnswer = await this._postAnswer(jsonAnswer)
+
+      // Set new next URL that came back from the answer.
+      this._nextURL = postedAnswer.nextURL
+      console.log(`Next url: ${this._nextURL}`)
+
+      // When status is OK but next url is undefined,
+      // there are no more questions to get and the
+      // player has therefore won.
+      if (this._nextURL === undefined) {
+        this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
+      } else {
+        this.dispatchEvent(new CustomEvent('answerHandled', { bubbles: true, composed: true }))
+      }
 
       // Clean up input field.
       this._answerInput.value = ''
-      this._answerInput.focus()
+    }
+
+    /**
+     * Reset by going back to the first URL.
+     *
+     * @param {Event} event - To reset the questions.
+     */
+    _resetQuestion (event) {
+      this._nextURL = 'http://courselab.lnu.se/question/1'
+      this._answerInput.value = ''
+    }
+
+    /**
+     * Doing the GET request.
+     *
+     * @param {string} url - the URL to fetch.
+     * @returns {Promise<object>} - the response in JSON.
+     */
+    async _getQuestion (url) {
+      const response = await fetch(`${url}`)
+      console.log(response)
+
+      if (!response.ok) {
+        console.error(`Oops, an error: ${response.status}`)
+      }
+
+      const body = await response.json()
+      console.log(body)
+      return body
+    }
+
+    /**
+     * Handling the POST request.
+     *
+     * @param {object} answer - Submitted answer in JSON-format.
+     * @returns {object} - The response object in JSON.
+     */
+    async _postAnswer (answer) {
+      const postAnswer = await fetch(`${this._nextURL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: answer
+      })
+      console.log(postAnswer)
+
+      if (postAnswer.ok) {
+        console.log('status ok - return for further process')
+        const body = await postAnswer.json()
+        console.log(body)
+        return body
+      } else {
+        console.log('status not ok - gameover event')
+        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
+      }
     }
 
     /**
      * Display current question.
      *
-     * @param {*} question - The question to display.
+     * @param {string} question - The question to display.
      */
     _displayQuestion (question) {
       // Clean up from previous question.
@@ -309,10 +257,13 @@ customElements.define('quiz-questions',
      */
     _displayAnswerOptions (questionRequest) {
       if (!questionRequest.alternatives) {
+        // Display textfield for answer submition when no opitons.
         console.log('DISPLAY TEXTFIELD!')
         // Hide and show relevant element in form.
         this._textDiv.classList.remove('hidden')
         this._radioButtons.classList.add('hidden')
+
+        this._answerInput.focus()
       } else {
         console.log('DISPLAY BUTTONS!')
         // Get how many of the options there are present.

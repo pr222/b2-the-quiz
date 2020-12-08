@@ -125,15 +125,21 @@ customElements.define('countdown-timer',
     _reset (timer) {
       clearInterval(timer)
       console.log('clearing countdown timer')
+      console.log('limit ' + this._limit)
+      console.log('counter ' + this._count)
+      this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._counter } }))
 
+      this._count = 0
       return this
     }
 
     /**
      * Timer counting down with a setInterval,
      * which callbacks every 1 sec.
+     *
+     * @param {Event} event - Starting the countdown.
      */
-    _countdown () {
+    _countdown (event) {
       let time = this._limit
 
       // First display of starting number.
