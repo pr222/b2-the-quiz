@@ -55,7 +55,7 @@ customElements.define('quiz-app',
         .appendChild(template.content.cloneNode(true))
 
       // Default state of the page as 'firstPage'.
-      // Other states: ¿'quiz'?, 'gameover', 'win' & 'restarting'
+      // Other states: 'quiz', 'gameover', 'win' & 'restarting'
       this._gameState = 'firstPage'
 
       // Wether the player won.
@@ -77,6 +77,7 @@ customElements.define('quiz-app',
       // this._startGame = this._startGame.bind(this)
       this._newUser = this._newUser.bind(this)
       this._questionReceived = this._questionReceived.bind(this)
+      this._answerOK = this._answerOK.bind(this)
       this._gameover = this._gameover.bind(this)
       this._resetGame = this._resetGame.bind(this)
       this._timerInfo = this._timerInfo.bind(this)
@@ -106,7 +107,7 @@ customElements.define('quiz-app',
     }
 
     /**
-     * Takes care of event when user submits its name.
+     * Takes care of event when user has submitted its name.
      *
      * @param {Event} event - When user has submitted its nickname.
      */
@@ -126,14 +127,13 @@ customElements.define('quiz-app',
     /**
      * Start the game.
      *
-     * @param {object} user - The current user in JSON.
+     * @param {object} user - The current player.
      */
     _startGame (user) {
       this._renderGame()
       this._gameState = 'quiz'
 
-      console.log('Can we start first question?')
-      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+      this._eventBus('startQuestion')
     }
 
     /**
@@ -148,8 +148,7 @@ customElements.define('quiz-app',
       limitNumber = Object.values(limitNumber)
       this._timer.setAttribute('limit', `${limitNumber}`)
 
-      console.log('Can we start the timer?')
-      this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
+      this._eventBus('startTimer')
     }
 
     /**
@@ -158,12 +157,11 @@ customElements.define('quiz-app',
      * @param {Event} event - The answer was right.
      */
     _answerOK (event) {
-      console.log('Answer OK, can we stop the timer?')
-      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
+      this._eventBus('stopTimer')
 
       // // Next round!
-      console.log('Can we start a question?')
-      this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+      console.log('Can we start another question?')
+      this._eventBus('startQuestion')
     }
 
     /**
@@ -186,8 +184,8 @@ customElements.define('quiz-app',
      * @param {Event} event - Gameover, losing or winning.
      */
     _gameover (event) {
-      console.log('Game over, can we stop the timer?')
-      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
+      this._eventBus('stopTimer')
+
       if (event.type === 'gameover') {
         console.log('GAME OVER!!!')
         this._gameState = 'gameover'
@@ -198,6 +196,7 @@ customElements.define('quiz-app',
       }
 
       // Update highscore!
+      console.log(this._player)
 
       this._renderGame()
     }
@@ -208,17 +207,24 @@ customElements.define('quiz-app',
      * @param {Event} event - Click event to reset game.
      */
     _resetGame (event) {
-      console.log('reset game')
+      console.log('resetting game')
       this._gameState = 'restarting'
       this._playerWon = false
 
-      this.dispatchEvent(new CustomEvent('resetQuestion', { bubbles: true, composed: true }))
-      // Placeholder stop-event before switching to gameover:
-      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
+      this._eventBus('resetQuestion')
 
       // Render and then reset the state to default.
       this._renderGame()
       this._gameState = 'firstPage'
+    }
+
+    /**
+     * Dispatch a new custom event.
+     *
+     * @param {string} event - The name of custom event to dispatch.
+     */
+    _eventBus (event) {
+      this.dispatchEvent(new CustomEvent(`${event}`, { bubbles: true, composed: true }))
     }
 
     /**

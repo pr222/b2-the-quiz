@@ -141,45 +141,50 @@ customElements.define('quiz-questions',
      * @param {Event} event - submit the answer.
      */
     async _onSubmit (event) {
-      // Prevent default posting of form submission.
-      event.preventDefault()
+      try {
+        // Prevent default posting of form submission.
+        event.preventDefault()
 
-      let chosenAnswer
+        let chosenAnswer
 
-      if (this._answerInput.value.length > 0) {
-        // console.log('TEXT INPUT VALUE')
-        chosenAnswer = this._answerInput.value.toLowerCase()
-        // console.log(chosenAnswer)
-      } else {
-        // console.log('RADIO BUTT VAL')
-        // RADIO BUTTON chosenAnswer
-        chosenAnswer = this._submitAnswer.option.value
-        // console.log(chosenAnswer)
+        if (this._answerInput.value.length > 0) {
+          // console.log('TEXT INPUT VALUE')
+          chosenAnswer = this._answerInput.value.toLowerCase()
+          // console.log(chosenAnswer)
+        } else {
+          // console.log('RADIO BUTT VAL')
+          // RADIO BUTTON chosenAnswer
+          chosenAnswer = this._submitAnswer.option.value
+          // console.log(chosenAnswer)
+        }
+
+        // Extract answer from event and convert to JSON.
+        const answer = { answer: chosenAnswer }
+        const jsonAnswer = JSON.stringify(answer)
+        // console.log(jsonAnswer)
+
+        // Post the answer to the server.
+        const postedAnswer = await this._postAnswer(jsonAnswer)
+
+        // Set new next URL that came back from the answer.
+        this._nextURL = postedAnswer.nextURL
+        // console.log(`Next url: ${this._nextURL}`)
+
+        // When status is OK but next url is undefined,
+        // there are no more questions to get and the
+        // player has therefore won.
+        if (this._nextURL === undefined) {
+          this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
+        } else {
+          this.dispatchEvent(new CustomEvent('answerOK', { bubbles: true, composed: true }))
+        }
+
+        // Clean up input field.
+        this._answerInput.value = ''
+      } catch (err) {
+        console.log('Something went wrong at submit')
+        console.error(err)
       }
-
-      // Extract answer from event and convert to JSON.
-      const answer = { answer: chosenAnswer }
-      const jsonAnswer = JSON.stringify(answer)
-      // console.log(jsonAnswer)
-
-      // Post the answer to the server.
-      const postedAnswer = await this._postAnswer(jsonAnswer)
-
-      // Set new next URL that came back from the answer.
-      this._nextURL = postedAnswer.nextURL
-      // console.log(`Next url: ${this._nextURL}`)
-
-      // When status is OK but next url is undefined,
-      // there are no more questions to get and the
-      // player has therefore won.
-      if (this._nextURL === undefined) {
-        this.dispatchEvent(new CustomEvent('win', { bubbles: true, composed: true }))
-      } else {
-        this.dispatchEvent(new CustomEvent('answerOK', { bubbles: true, composed: true }))
-      }
-
-      // Clean up input field.
-      this._answerInput.value = ''
     }
 
     /**
@@ -199,16 +204,21 @@ customElements.define('quiz-questions',
      * @returns {Promise<object>} - the response in JSON.
      */
     async _getQuestion (url) {
-      const response = await fetch(`${url}`)
-      // console.log(response)
+      try {
+        const response = await fetch(`${url}`)
+        // console.log(response)
 
-      if (!response.ok) {
-        console.error(`Oops, an error: ${response.status}`)
+        if (!response.ok) {
+          console.error(`Oops, an error: ${response.status}`)
+        }
+
+        const body = await response.json()
+        // console.log(body)
+        return body
+      } catch (err) {
+        console.log('Oops! Something went wrong with GET!')
+        console.error(err)
       }
-
-      const body = await response.json()
-      // console.log(body)
-      return body
     }
 
     /**
@@ -218,23 +228,28 @@ customElements.define('quiz-questions',
      * @returns {object} - The response object in JSON.
      */
     async _postAnswer (answer) {
-      const postAnswer = await fetch(`${this._nextURL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: answer
-      })
-      // console.log(postAnswer)
+      try {
+        const postAnswer = await fetch(`${this._nextURL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: answer
+        })
+        // console.log(postAnswer)
 
-      if (postAnswer.ok) {
-        console.log('status ok - return for further process')
-        const body = await postAnswer.json()
-        // console.log(body)
-        return body
-      } else {
-        console.log('status not ok - gameover event')
-        this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
+        if (postAnswer.ok) {
+          console.log('status ok - return for further process')
+          const body = await postAnswer.json()
+          // console.log(body)
+          return body
+        } else {
+          console.log('status not ok - gameover event')
+          this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
+        }
+      } catch (err) {
+        console.log('Ooops! Something went wrong with POST!')
+        console.error(err)
       }
     }
 
