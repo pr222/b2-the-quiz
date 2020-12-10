@@ -107,6 +107,7 @@ customElements.define('quiz-questions',
      */
     disconnectedCallback () {
       window.removeEventListener('startQuestion', this._startQuestion)
+      window.removeEventListener('resetQuestion', this._resetQuestion)
       this._submitAnswer.removeEventListener('submit', this._onSubmit)
     }
 
@@ -117,7 +118,7 @@ customElements.define('quiz-questions',
      */
     async _startQuestion (event) {
       console.log('_startQuestion began')
-      console.log(this._nextURL)
+      // console.log(this._nextURL)
 
       this._answerInput.focus()
 
@@ -125,10 +126,11 @@ customElements.define('quiz-questions',
 
       const question = request.question
       this._displayQuestion(question)
+
       this._displayAnswerOptions(request)
 
       this._nextURL = request.nextURL
-      console.log(`Next url: ${this._nextURL}`)
+      // console.log(`Next url: ${this._nextURL}`)
 
       this.dispatchEvent(new CustomEvent('questionOK', { bubbles: true, composed: true, detail: { currentQuestion: request.limit } }))
     }
@@ -147,25 +149,25 @@ customElements.define('quiz-questions',
       if (this._answerInput.value.length > 0) {
         console.log('TEXT INPUT VALUE')
         chosenAnswer = this._answerInput.value.toLowerCase()
-        console.log(chosenAnswer)
+        // console.log(chosenAnswer)
       } else {
         console.log('RADIO BUTT VAL')
         // RADIO BUTTON chosenAnswer
         chosenAnswer = this._submitAnswer.option.value
-        console.log(chosenAnswer)
+        // console.log(chosenAnswer)
       }
 
       // Extract answer from event and convert to JSON.
       const answer = { answer: chosenAnswer }
       const jsonAnswer = JSON.stringify(answer)
-      console.log(jsonAnswer)
+      // console.log(jsonAnswer)
 
       // Post the answer to the server.
       const postedAnswer = await this._postAnswer(jsonAnswer)
 
       // Set new next URL that came back from the answer.
       this._nextURL = postedAnswer.nextURL
-      console.log(`Next url: ${this._nextURL}`)
+      // console.log(`Next url: ${this._nextURL}`)
 
       // When status is OK but next url is undefined,
       // there are no more questions to get and the
@@ -205,7 +207,7 @@ customElements.define('quiz-questions',
       }
 
       const body = await response.json()
-      console.log(body)
+      // console.log(body)
       return body
     }
 
@@ -223,12 +225,12 @@ customElements.define('quiz-questions',
         },
         body: answer
       })
-      console.log(postAnswer)
+      // console.log(postAnswer)
 
       if (postAnswer.ok) {
         console.log('status ok - return for further process')
         const body = await postAnswer.json()
-        console.log(body)
+        // console.log(body)
         return body
       } else {
         console.log('status not ok - gameover event')
@@ -256,23 +258,14 @@ customElements.define('quiz-questions',
      * @param {object} questionRequest - If present, an object with options to answer.
      */
     _displayAnswerOptions (questionRequest) {
-      if (!questionRequest.alternatives) {
-        // Display textfield for answer submition when no opitons.
-        console.log('DISPLAY TEXTFIELD!')
-        // Hide and show relevant element in form.
-        this._textDiv.classList.remove('hidden')
-        this._radioButtons.classList.add('hidden')
-
-        this._answerInput.focus()
-      } else {
-        console.log('DISPLAY BUTTONS!')
+      if (questionRequest.alternatives) {
+        // console.log('DISPLAY BUTTONS!')
         // Get how many of the options there are present.
         const options = questionRequest.alternatives
-        console.log(options)
+        // console.log(options)
         const howMany = Object.keys(options).length
-        console.log(howMany)
+        // console.log(howMany)
 
-        // Only show radio button-options if they are within reasonable amount.
         if (howMany > 2 && howMany < 10) {
           // First, remove previous radio buttons.
           while (this._radioButtons.firstElementChild) {
@@ -309,6 +302,14 @@ customElements.define('quiz-questions',
           // Lastly, add the list into the form.
           this._radioButtons.appendChild(ul)
         }
+      } else {
+        // Display textfield for answer submition when no opitons.
+        // console.log('DISPLAY TEXTFIELD!')
+        // Hide and show relevant element in form.
+        this._textDiv.classList.remove('hidden')
+        this._radioButtons.classList.add('hidden')
+
+        this._answerInput.focus()
       }
     }
   }

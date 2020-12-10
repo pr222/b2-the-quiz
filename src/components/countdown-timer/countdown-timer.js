@@ -114,16 +114,6 @@ customElements.define('countdown-timer',
     }
 
     /**
-     * Get the counter.
-     *
-     * @readonly
-     * @returns {number} - The counters current number.
-     */
-    get count () {
-      return this._count
-    }
-
-    /**
      * Stop the timer.
      *
      * @param {Event} event - To stop the timer.
@@ -132,7 +122,6 @@ customElements.define('countdown-timer',
       console.log('stopTimer' + timer)
       clearInterval(timer)
       timer = null
-      console.log('Timer stopped?' + timer)
       this._reset()
     }
 
@@ -143,16 +132,15 @@ customElements.define('countdown-timer',
      */
     _reset () {
       console.log('resetting countdown timer')
-      console.log('limit ' + this._limit)
-      console.log('counter ' + this._count)
+      // console.log('limit ' + this._limit)
+      // console.log('counter ' + this._count)
 
-      console.log('EVENT send from timer: Stopped')
+      console.log('Dispatch: timerStopped')
       this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._counter } }))
 
       this._count = 0
-      console.log('limit ' + this._limit)
-      console.log('counter ' + this._count)
-      console.log('end of clearing ' + timer)
+      // console.log('limit ' + this._limit)
+      // console.log('counter ' + this._count)
       return this
     }
 
@@ -163,17 +151,18 @@ customElements.define('countdown-timer',
      * @param {Event} event - Starting the countdown.
      */
     _countdown (event) {
-      console.log('EVENT began in timer: start timer')
+      console.log('"startTimer" activated: _countDown')
       let time = this._limit
-      console.log('The limit for this question: ' + this._limit)
+      // console.log('The limit for this question: ' + this._limit)
+
       // First display of starting number.
       this._displayTime(time)
 
       console.log('START INTERVAL')
       // Begin timer in an interval.
       timer = setInterval(() => {
-        console.log(timer)
-        console.log('an interval')
+        // console.log(timer)
+        // console.log('an interval')
         this._count++
         time = this._limit - this._count
 
