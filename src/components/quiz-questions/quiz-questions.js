@@ -147,11 +147,11 @@ customElements.define('quiz-questions',
       let chosenAnswer
 
       if (this._answerInput.value.length > 0) {
-        console.log('TEXT INPUT VALUE')
+        // console.log('TEXT INPUT VALUE')
         chosenAnswer = this._answerInput.value.toLowerCase()
         // console.log(chosenAnswer)
       } else {
-        console.log('RADIO BUTT VAL')
+        // console.log('RADIO BUTT VAL')
         // RADIO BUTTON chosenAnswer
         chosenAnswer = this._submitAnswer.option.value
         // console.log(chosenAnswer)
@@ -200,7 +200,7 @@ customElements.define('quiz-questions',
      */
     async _getQuestion (url) {
       const response = await fetch(`${url}`)
-      console.log(response)
+      // console.log(response)
 
       if (!response.ok) {
         console.error(`Oops, an error: ${response.status}`)

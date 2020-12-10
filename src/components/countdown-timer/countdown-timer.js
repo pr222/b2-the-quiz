@@ -119,7 +119,7 @@ customElements.define('countdown-timer',
      * @param {Event} event - To stop the timer.
      */
     _stopTimer (event) {
-      console.log('stopTimer' + timer)
+      console.log('Stopping the timer')
       clearInterval(timer)
       timer = null
       this._reset()
@@ -135,8 +135,8 @@ customElements.define('countdown-timer',
       // console.log('limit ' + this._limit)
       // console.log('counter ' + this._count)
 
-      console.log('Dispatch: timerStopped')
-      this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._counter } }))
+      console.log('Timer stopped, here is how many seconds...')
+      this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._count } }))
 
       this._count = 0
       // console.log('limit ' + this._limit)
@@ -151,18 +151,20 @@ customElements.define('countdown-timer',
      * @param {Event} event - Starting the countdown.
      */
     _countdown (event) {
-      console.log('"startTimer" activated: _countDown')
+      console.log('Starting the timer.')
       let time = this._limit
       // console.log('The limit for this question: ' + this._limit)
 
       // First display of starting number.
       this._displayTime(time)
 
-      console.log('START INTERVAL')
+      // console.log('START INTERVAL')
+
       // Begin timer in an interval.
       timer = setInterval(() => {
         // console.log(timer)
         // console.log('an interval')
+
         this._count++
         time = this._limit - this._count
 

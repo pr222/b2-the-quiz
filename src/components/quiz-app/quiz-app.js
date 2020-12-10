@@ -61,6 +61,9 @@ customElements.define('quiz-app',
       // Wether the player won.
       this._playerWon = false
 
+      // The player who is currently answering questions.
+      this._player = {}
+
       // Selecting custom elements from the template in shadow root.
       this._restartButton = this.shadowRoot.querySelector('#restartButton')
       this._announcement = this.shadowRoot.querySelector('#announcement')
@@ -76,6 +79,7 @@ customElements.define('quiz-app',
       this._questionReceived = this._questionReceived.bind(this)
       this._gameover = this._gameover.bind(this)
       this._resetGame = this._resetGame.bind(this)
+      this._timerInfo = this._timerInfo.bind(this)
     }
 
     /**
@@ -85,6 +89,7 @@ customElements.define('quiz-app',
       this._userForm.addEventListener('newUser', this._newUser)
       this._quiz.addEventListener('questionOK', this._questionReceived)
       this._quiz.addEventListener('answerOK', this._answerOK)
+      this._timer.addEventListener('timerStopped', this._timerInfo)
       this._quiz.addEventListener('gameover', this._gameover)
       this._quiz.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
@@ -110,38 +115,12 @@ customElements.define('quiz-app',
       // Get the information obtained by the form from user-nickname.
       const newUser = event.detail.username
 
-      const currentUser = this._createUser(newUser)
-
-      this._startGame(currentUser)
-    }
-
-    /**
-     * Register a new user.
-     *
-     * @param {string} newUser - The nickname of the new user.
-     * @returns {object} - The new user in JSON.
-     */
-    _createUser (newUser) {
-      // Create a new user object.
-      const user = {
+      this._player = {
         player: newUser,
         score: 0
       }
 
-      // Convert user-object to a JSON.
-      const asJSON = JSON.stringify(user)
-      console.log(asJSON)
-
-      // Set unique id-number depending on when user is added.
-      // Although not the perfect serialization since other
-      // things also gets saved in the web storage.
-      const id = sessionStorage.length + 1
-
-      // Save user in web storage.
-      sessionStorage.setItem(`user_${id}`, asJSON)
-      // console.log(sessionStorage.getItem(`user_${id}`))
-
-      return asJSON
+      this._startGame(this._player)
     }
 
     /**
@@ -153,7 +132,7 @@ customElements.define('quiz-app',
       this._renderGame()
       this._gameState = 'quiz'
 
-      console.log('EVENT sent from app: startQuestion')
+      console.log('Can we start first question?')
       this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
     }
 
@@ -163,31 +142,42 @@ customElements.define('quiz-app',
      * @param {Event} event - Event with information of time limit.
      */
     _questionReceived (event) {
-      console.log(event.detail)
+      // console.log(event.detail)
 
       let limitNumber = event.detail
       limitNumber = Object.values(limitNumber)
       this._timer.setAttribute('limit', `${limitNumber}`)
 
-      console.log('EVENT from app: start timer')
+      console.log('Can we start the timer?')
       this.dispatchEvent(new CustomEvent('startTimer', { bubbles: true, composed: true }))
     }
 
     /**
-     * Prepare next question.
+     * Handle event when the given answer has been checked and was right.
      *
-     * From event: The answer is processed, ready for next question
-     *
-     * @param {Event} event - If event present, prevoius answer is handled and ready for next question.
+     * @param {Event} event - The answer was right.
      */
     _answerOK (event) {
-      console.log('EVENT from app: stop timer')
+      console.log('Can we stop the timer?')
       this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
 
-      // Handle score saving.
-
-      console.log('EVENT from app: startQuestion')
+      // // Next round!
+      console.log('Can we start a question?')
       this.dispatchEvent(new CustomEvent('startQuestion', { bubbles: true, composed: true }))
+    }
+
+    /**
+     * Timer stopped, giving back info of elapsed time.
+     *
+     * @param {Event} event - Timer stopped.
+     */
+    _timerInfo (event) {
+      let score = event.detail
+      score = Object.values(score)
+      console.log('The score of this question: ' + score)
+      score = parseInt(score)
+      this._player.score += score
+      console.log(this._player)
     }
 
     /**
