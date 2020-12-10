@@ -117,7 +117,7 @@ customElements.define('quiz-app',
       const newUser = event.detail.username
 
       this._player = {
-        player: newUser,
+        name: newUser,
         score: 0
       }
 
@@ -193,12 +193,10 @@ customElements.define('quiz-app',
         console.log('WIN!')
         this._gameState = 'win'
         this._playerWon = true
+
+        console.log(this._player)
+        this.dispatchEvent(new CustomEvent('newScore', { bubbles: true, composed: true, detail: { scoreInfo: this._player } }))
       }
-
-      // Update highscore!
-      console.log(this._player)
-
-      this.dispatchEvent(new CustomEvent('newScore', { bubbles: true, composed: true, detail: { Player: this._player } }))
 
       this._renderGame()
     }

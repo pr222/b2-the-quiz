@@ -29,6 +29,10 @@ table {
   background-color: #CCCCCC;
   border-radius: 5px;
 }
+
+td {
+  text-align: center;
+}
 </style>
 
 <div>
@@ -43,11 +47,7 @@ table {
       </tr>
     </thead>
     <tbody>
-    <tr id="first"></tr>
-    <tr id="second"></tr>
-    <tr id="third"></tr>
-    <tr id="fourth"></tr>
-    <tr id="fifth"></tr>
+
     </tbody>
   </table>
 </div>
@@ -70,52 +70,103 @@ customElements.define('high-score',
       this.attachShadow({ mode: 'open' })
         .appendChild(template.content.cloneNode(true))
 
-      //
+      // Highscore-array to keep the 5 best scores in.
       this._highscore = []
-    }
 
-    /**
-     * Looks out for changes in attributes.
-     *
-     * @returns {string[]} - An array with stings of the attibutes.
-     */
-    static get observedAttributes () {
-      return []
-    }
+      // Get the table element from shadow to present the scores in.
+      this._highscoreTable = this.shadowRoot.querySelector('tbody')
 
-    /**
-     * Called by the browser when an attribute is changed.
-     *
-     * @param {string} name - The name of the attribute.
-     * @param {any} oldValue - The old attribute value.
-     * @param {any} newValue - The new attribute.
-     */
-    attributeChangedCallback (name, oldValue, newValue) {
-      //
+      // Bind to reach this.
+      this._updateScores = this._updateScores.bind(this)
     }
 
     /**
      * Called when the element has been insterted into the DOM.
      */
     connectedCallback () {
-      window.addEventListener('newScore', this._checkNewScore)
+      window.addEventListener('newScore', this._updateScores)
     }
 
     /**
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
-      window.removeEventListener('newScore', this._checkNewScore)
+      window.removeEventListener('newScore', this._updateScores)
       //
     }
 
     /**
-     * Check if new incoming score is qualified.
+     * Update highscore with the new score.
      *
-     * @param {Event} event - Incoming user-score.
+     * @param {Event} event - Incoming new score of a player.
      */
-    _checkNewScore (event) {
+    _updateScores (event) {
       console.log(event.detail)
+      const currentPlayer = event.detail.scoreInfo
+      console.log(currentPlayer)
+      const currentScore = currentPlayer.score
+      console.log(currentScore)
+
+      // Lowest score taken into account is 1.
+      if (currentScore > 1) {
+        // First winner? Add player automatically to highscore.
+        if (this._highscore.length < 1) {
+          this._highscore.push(currentPlayer)
+        // Still free space? Add player and sort.
+        } else if (this._highscore.length < 5) {
+          this._highscore.push(currentPlayer)
+          this._highscore.sort((a, b) => a.score - b.score)
+        } else {
+          // Highscore already full? Check to see if worth updating
+          // and make it so, otherwise just keep highscore as is.
+          const worstScore = this._highscore[4].score
+          console.log('worst score: ' + worstScore)
+
+          if (currentScore < worstScore) {
+            this._highscore.pop()
+            this._highscore.push(currentPlayer)
+            this._highscore.sort((a, b) => a.score - b.score)
+          }
+        }
+      }
+      console.log(this._highscore)
+
+      // Convert highscore to a JSON format.
+      const toJson = JSON.stringify(this._highscore)
+      console.log(toJson)
+
+      // Save highscore to web storage.
+      localStorage.setItem('best-quiz-highscore', toJson)
+
+      this._renderHighscore()
+    }
+
+    /**
+     * Render the highscore information into the html template.
+     */
+    _renderHighscore () {
+      // First, remove previous rendering.
+      while (this._highscoreTable.firstElementChild) {
+        this._highscoreTable.removeChild(this._highscoreTable.lastChild)
+      }
+      // Go through all players to add to the table.
+      for (let i = 0; i < this._highscore.length; i++) {
+        // Create a table row.
+        const tr = document.createElement('tr')
+
+        // Add the player name to row.
+        const tdName = document.createElement('td')
+        tdName.textContent = this._highscore[i].name
+        tr.appendChild(tdName)
+
+        // Add the player's score to row.
+        const tdScore = document.createElement('td')
+        tdScore.textContent = this._highscore[i].score
+        tr.appendChild(tdScore)
+
+        // Add row to the table.
+        this._highscoreTable.appendChild(tr)
+      }
     }
   }
 )
