@@ -71,6 +71,7 @@ customElements.define('high-score',
         .appendChild(template.content.cloneNode(true))
 
       //
+      this._highscore = []
     }
 
     /**
@@ -97,16 +98,24 @@ customElements.define('high-score',
      * Called when the element has been insterted into the DOM.
      */
     connectedCallback () {
-      //
+      window.addEventListener('newScore', this._checkNewScore)
     }
 
     /**
      * Called when the element has been removed from the DOM.
      */
     disconnectedCallback () {
+      window.removeEventListener('newScore', this._checkNewScore)
       //
     }
 
-    //
+    /**
+     * Check if new incoming score is qualified.
+     *
+     * @param {Event} event - Incoming user-score.
+     */
+    _checkNewScore (event) {
+      console.log(event.detail)
+    }
   }
 )

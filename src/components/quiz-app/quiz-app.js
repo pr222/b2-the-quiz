@@ -198,6 +198,8 @@ customElements.define('quiz-app',
       // Update highscore!
       console.log(this._player)
 
+      this.dispatchEvent(new CustomEvent('newScore', { bubbles: true, composed: true, detail: { Player: this._player } }))
+
       this._renderGame()
     }
 
