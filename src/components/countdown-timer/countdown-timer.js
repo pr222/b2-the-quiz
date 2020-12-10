@@ -170,7 +170,7 @@ customElements.define('countdown-timer',
 
         // Stop the timer when reaching 0.
         if (time <= 0) {
-          this._stopTimer()
+          this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
         } else {
           // If timer was not stopped, render the number.
           this._displayTime(time)

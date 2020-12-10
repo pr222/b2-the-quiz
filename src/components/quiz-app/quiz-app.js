@@ -90,8 +90,8 @@ customElements.define('quiz-app',
       this._quiz.addEventListener('questionOK', this._questionReceived)
       this._quiz.addEventListener('answerOK', this._answerOK)
       this._timer.addEventListener('timerStopped', this._timerInfo)
-      this._quiz.addEventListener('gameover', this._gameover)
-      this._quiz.addEventListener('win', this._gameover)
+      this.addEventListener('gameover', this._gameover)
+      this.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
     }
 
@@ -100,8 +100,8 @@ customElements.define('quiz-app',
      */
     disconnectedCallback () {
       this._username.removeEventListener('newUser', this._newUser)
-      this._quiz.removeEventListener('gameover', this._gameover)
-      this._quiz.removeEventListener('win', this._gameover)
+      this.removeEventListener('gameover', this._gameover)
+      this.removeEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
     }
 
@@ -158,7 +158,7 @@ customElements.define('quiz-app',
      * @param {Event} event - The answer was right.
      */
     _answerOK (event) {
-      console.log('Can we stop the timer?')
+      console.log('Answer OK, can we stop the timer?')
       this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
 
       // // Next round!
@@ -186,6 +186,8 @@ customElements.define('quiz-app',
      * @param {Event} event - Gameover, losing or winning.
      */
     _gameover (event) {
+      console.log('Game over, can we stop the timer?')
+      this.dispatchEvent(new CustomEvent('stopTimer', { bubbles: true, composed: true }))
       if (event.type === 'gameover') {
         console.log('GAME OVER!!!')
         this._gameState = 'gameover'
