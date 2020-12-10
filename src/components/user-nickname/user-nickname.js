@@ -14,7 +14,7 @@ template.innerHTML = `
 <style>
   :host {
     display: block;
-    background-color: #CCCCCC;
+    background-color: #eaa6ae8a;
     text-align: center;
     margin-top: 25px;
     margin-bottom: 15px;

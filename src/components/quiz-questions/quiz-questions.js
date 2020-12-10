@@ -14,7 +14,7 @@ template.innerHTML = `
   :host {
     display: block;
     font-family: Georgia, 'Times New Roman', Times, serif;
-    background-color: #CCCCCC;
+    background-color: #cef0f0db;
     border-radius: 5px;
   }
 
@@ -26,14 +26,25 @@ template.innerHTML = `
   }
 
   :host ul {
-    text-align: left;
+    text-align: center;
+    padding: 0px;
   }
 
   :host li {
+    display: inline-block;
     list-style: none;
     padding: 2px;
+    margin-left: 50px;
   }
 
+  :host #radioButtons label {
+    display: inline-block;
+    border: 2px solid #016a5aa1;
+    border-radius: 5px;
+    padding: 8px;
+    padding-right: 75px;
+  }
+ 
   .hidden {
     display: none;
   }
@@ -43,9 +54,9 @@ template.innerHTML = `
   <h1 id="question">Question</h1>
 
   <form id="answerForm">
-    
-    <div id="radioButtons" class="hidden">
-    </div>
+
+      <div id="radioButtons" class="hidden">
+      </div>
     <div id="textAnswer">
       <label for="answerInput">Answer: </label>
       <input type="text" id="answerInput" name="answerInput" autofocus autocomplete="off">

@@ -26,7 +26,7 @@ h1 {
 table {
   border-spacing: 15px;
   margin: 0 auto;
-  background-color: #CCCCCC;
+  background-color: #fff17ecc;
   border-radius: 5px;
 }
 

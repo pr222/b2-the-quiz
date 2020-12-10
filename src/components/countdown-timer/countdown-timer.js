@@ -16,7 +16,7 @@ template.innerHTML = `
   :host {
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     display: block;
-    background-color: #CCCCCC;
+    background-color: #eeeccc;
     border-radius: 5px;
   }
 

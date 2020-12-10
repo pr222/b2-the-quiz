@@ -27,13 +27,15 @@ template.innerHTML = `
 
   <div>
     <h1>Quiz Time!</h1>
-    <input type="button" id="restartButton" class="hidden" value="Restart">
     <h2 id="announcement"></h2>
   </div>
   <user-nickname></user-nickname>
   <countdown-timer class="hidden"></countdown-timer>
   <quiz-questions class="hidden"></quiz-questions>
   <high-score class="hidden"></high-score>
+  <div>
+    <input type="button" id="restartButton" class="hidden" value="Restart">
+  </div>
 `
 
 /**
