@@ -207,7 +207,7 @@ customElements.define('quiz-questions',
 
         return body
       } catch (err) {
-        console.log(`Oops! Something went wrong with GET! Status: ${response.status}`)
+        console.log('Oops! Something went wrong with GET!')
         console.error(err)
       }
     }

@@ -156,7 +156,7 @@ customElements.define('countdown-timer',
 
         if (time <= 0) {
           // Tell that timer has reached its end.
-          // But dependent on other component to tell timer to stop if desired. 
+          // But dependent on other component to tell timer to stop if desired.
           this.dispatchEvent(new CustomEvent('timeEnd', { bubbles: true, composed: true }))
         } else {
           this._displayTime(time)
