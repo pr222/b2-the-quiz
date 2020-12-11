@@ -119,9 +119,7 @@ customElements.define('countdown-timer',
      * @param {Event} event - To stop the timer.
      */
     _stopTimer (event) {
-      console.log('Stopping the timer')
       clearInterval(timer)
-      timer = null
       this._reset()
     }
 
@@ -131,16 +129,11 @@ customElements.define('countdown-timer',
      * @returns {object} - Reference to itself.
      */
     _reset () {
-      console.log('resetting countdown timer')
-      // console.log('limit ' + this._limit)
-      // console.log('counter ' + this._count)
-
-      console.log('Timer stopped, here is how many seconds...')
+      // Send information of how many seconds the timer has elapsed.
       this.dispatchEvent(new CustomEvent('timerStopped', { bubbles: true, composed: true, detail: { counter: this._count } }))
 
       this._count = 0
-      // console.log('limit ' + this._limit)
-      // console.log('counter ' + this._count)
+
       return this
     }
 
@@ -151,28 +144,21 @@ customElements.define('countdown-timer',
      * @param {Event} event - Starting the countdown.
      */
     _countdown (event) {
-      console.log('Starting the timer.')
       let time = this._limit
-      // console.log('The limit for this question: ' + this._limit)
 
       // First display of starting number.
       this._displayTime(time)
 
-      // console.log('START INTERVAL')
-
-      // Begin timer in an interval.
+      // Begin timer in an interval every 1 second.
       timer = setInterval(() => {
-        // console.log(timer)
-        // console.log('an interval')
-
         this._count++
         time = this._limit - this._count
 
-        // Stop the timer when reaching 0.
         if (time <= 0) {
-          this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
+          // Tell that timer has reached its end.
+          // But dependent on other component to tell timer to stop if desired. 
+          this.dispatchEvent(new CustomEvent('timeEnd', { bubbles: true, composed: true }))
         } else {
-          // If timer was not stopped, render the number.
           this._displayTime(time)
         }
       }, 1000)
@@ -193,7 +179,7 @@ customElements.define('countdown-timer',
       const number = document.createElement('p')
       number.textContent = time
 
-      // Add the time-number to the #counter-div.
+      // Add the number to the #counter-div.
       this._counter.append(number)
     }
   }

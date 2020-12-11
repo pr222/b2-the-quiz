@@ -52,17 +52,13 @@ template.innerHTML = `
 
 <div>
   <h1 id="question">Question</h1>
-
   <form id="answerForm">
-
-      <div id="radioButtons" class="hidden">
-      </div>
+    <div id="radioButtons" class="hidden"></div>
     <div id="textAnswer">
       <label for="answerInput">Answer: </label>
       <input type="text" id="answerInput" name="answerInput" autofocus autocomplete="off">
     </div>
-    <input type="submit" value="Send answer">
-    
+    <input type="submit" value="Send answer">   
   </form>
 </div>
 `
@@ -86,9 +82,6 @@ customElements.define('quiz-questions',
 
       // The next url to GET or POST.
       this._nextURL = 'http://courselab.lnu.se/question/1'
-
-      // The current question to use.
-      this._currentQuestion = ''
 
       // Get the elements of this template.
       this._question = this.shadowRoot.querySelector('#question')
@@ -123,33 +116,32 @@ customElements.define('quiz-questions',
     }
 
     /**
-     * Take care of begin question event.
+     * Take care of event beginning a new question.
      *
-     * @param {Event} event -
+     * @param {Event} event - Activating a new question to be handled.
      */
     async _startQuestion (event) {
-      console.log('_startQuestion began')
-      // console.log(this._nextURL)
-
-      this._answerInput.focus()
-
+      // Fetch question from server using the next URL.
       const request = await this._getQuestion(this._nextURL)
 
+      // Take out the question and display the text on the page.
       const question = request.question
       this._displayQuestion(question)
 
+      // Handle how to display ways of answering the question.
       this._displayAnswerOptions(request)
 
+      // Update the next URL.
       this._nextURL = request.nextURL
-      // console.log(`Next url: ${this._nextURL}`)
 
+      // Telling all is done and send info about qurrent question's time-limit.
       this.dispatchEvent(new CustomEvent('questionOK', { bubbles: true, composed: true, detail: { currentQuestion: request.limit } }))
     }
 
     /**
-     * Take care of submit answer-event.
+     * Take care of event when an answer is submitted.
      *
-     * @param {Event} event - submit the answer.
+     * @param {Event} event - submit event.
      */
     async _onSubmit (event) {
       try {
@@ -158,28 +150,22 @@ customElements.define('quiz-questions',
 
         let chosenAnswer
 
+        // Check and choose value for written text or radiobutton-options.
         if (this._answerInput.value.length > 0) {
-          // console.log('TEXT INPUT VALUE')
           chosenAnswer = this._answerInput.value.toLowerCase()
-          // console.log(chosenAnswer)
         } else {
-          // console.log('RADIO BUTT VAL')
-          // RADIO BUTTON chosenAnswer
           chosenAnswer = this._submitAnswer.option.value
-          // console.log(chosenAnswer)
         }
 
         // Extract answer from event and convert to JSON.
         const answer = { answer: chosenAnswer }
         const jsonAnswer = JSON.stringify(answer)
-        // console.log(jsonAnswer)
 
-        // Post the answer to the server.
+        // Post the answer to the server and check if it was right or wrong.
         const postedAnswer = await this._postAnswer(jsonAnswer)
 
         // Set new next URL that came back from the answer.
         this._nextURL = postedAnswer.nextURL
-        // console.log(`Next url: ${this._nextURL}`)
 
         // When status is OK but next url is undefined,
         // there are no more questions to get and the
@@ -193,15 +179,15 @@ customElements.define('quiz-questions',
         // Clean up input field.
         this._answerInput.value = ''
       } catch (err) {
-        console.log('Something went wrong at submit')
+        console.log('Something went wrong at submit answer, next URL was probably undefined.')
         console.error(err)
       }
     }
 
     /**
-     * Reset by going back to the first URL.
+     * Reset the question-flow by going back to the first URL.
      *
-     * @param {Event} event - To reset the questions.
+     * @param {Event} event - Event to reset the questions.
      */
     _resetQuestion (event) {
       this._nextURL = 'http://courselab.lnu.se/question/1'
@@ -217,17 +203,11 @@ customElements.define('quiz-questions',
     async _getQuestion (url) {
       try {
         const response = await fetch(`${url}`)
-        // console.log(response)
-
-        if (!response.ok) {
-          console.error(`Oops, an error: ${response.status}`)
-        }
-
         const body = await response.json()
-        // console.log(body)
+
         return body
       } catch (err) {
-        console.log('Oops! Something went wrong with GET!')
+        console.log(`Oops! Something went wrong with GET! Status: ${response.status}`)
         console.error(err)
       }
     }
@@ -235,8 +215,8 @@ customElements.define('quiz-questions',
     /**
      * Handling the POST request.
      *
-     * @param {object} answer - Submitted answer in JSON-format.
-     * @returns {object} - The response object in JSON.
+     * @param {JSON} answer - Submitted answer in JSON-format.
+     * @returns {Promise<object>} - The body of the response in JSON.
      */
     async _postAnswer (answer) {
       try {
@@ -247,15 +227,13 @@ customElements.define('quiz-questions',
           },
           body: answer
         })
-        // console.log(postAnswer)
 
         if (postAnswer.ok) {
-          console.log('status ok - return for further process')
           const body = await postAnswer.json()
-          // console.log(body)
+
           return body
         } else {
-          console.log('status not ok - gameover event')
+          // The answer was probably wrong, either way the game is now over.
           this.dispatchEvent(new CustomEvent('gameover', { bubbles: true, composed: true }))
         }
       } catch (err) {
@@ -285,13 +263,11 @@ customElements.define('quiz-questions',
      */
     _displayAnswerOptions (questionRequest) {
       if (questionRequest.alternatives) {
-        // console.log('DISPLAY BUTTONS!')
         // Get how many of the options there are present.
         const options = questionRequest.alternatives
-        // console.log(options)
         const howMany = Object.keys(options).length
-        // console.log(howMany)
 
+        // Restrict how many options are allowed.
         if (howMany > 2 && howMany < 10) {
           // First, remove previous radio buttons.
           while (this._radioButtons.firstElementChild) {
@@ -329,8 +305,8 @@ customElements.define('quiz-questions',
           this._radioButtons.appendChild(ul)
         }
       } else {
-        // Display textfield for answer submition when no opitons.
-        // console.log('DISPLAY TEXTFIELD!')
+        // Default to textfield for answering the question.
+
         // Hide and show relevant element in form.
         this._textDiv.classList.remove('hidden')
         this._radioButtons.classList.add('hidden')

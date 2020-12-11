@@ -10,29 +10,29 @@
 const template = document.createElement('template')
 template.innerHTML = ` 
 <style>
-:host {
-  display: block;
-  font-family: Arial, Helvetica, sans-serif;
-}
+  :host {
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-div {
-  margin: 10px;
-}
+  :host div {
+    margin: 10px;
+  }
 
-h1 {
-  margin: 0px;
-}
+  :host h1 {
+    margin: 0px;
+  }
 
-table {
-  border-spacing: 15px;
-  margin: 0 auto;
-  background-color: #fff17ecc;
-  border-radius: 5px;
-}
+  :host table {
+    border-spacing: 15px;
+    margin: 0 auto;
+    background-color: #fff17ecc;
+    border-radius: 5px;
+  }
 
-td {
-  text-align: center;
-}
+  :host td {
+    text-align: center;
+  }
 </style>
 
 <div>
@@ -46,9 +46,7 @@ td {
         <th>Score</th>
       </tr>
     </thead>
-    <tbody>
-
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
 `
@@ -101,11 +99,8 @@ customElements.define('high-score',
      * @param {Event} event - Incoming new score of a player.
      */
     _updateScores (event) {
-      console.log(event.detail)
       const currentPlayer = event.detail.scoreInfo
-      console.log(currentPlayer)
       const currentScore = currentPlayer.score
-      console.log(currentScore)
 
       // Lowest score taken into account is 1.
       if (currentScore > 1) {
@@ -120,7 +115,6 @@ customElements.define('high-score',
           // Highscore already full? Check to see if worth updating
           // and make it so, otherwise just keep highscore as is.
           const worstScore = this._highscore[4].score
-          console.log('worst score: ' + worstScore)
 
           if (currentScore < worstScore) {
             this._highscore.pop()
@@ -129,11 +123,9 @@ customElements.define('high-score',
           }
         }
       }
-      console.log(this._highscore)
 
       // Convert highscore to a JSON format.
       const toJson = JSON.stringify(this._highscore)
-      console.log(toJson)
 
       // Save highscore to web storage.
       localStorage.setItem('best-quiz-highscore', toJson)

@@ -15,7 +15,7 @@ template.innerHTML = `
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    div {
+    :host div {
       text-align: center;
     }
 
@@ -75,8 +75,6 @@ customElements.define('quiz-app',
       this._highscores = this.shadowRoot.querySelector('high-score')
 
       // Bindings for reaching this shadow.
-      // this._startQuestion = this._startQuestion.bind(this)
-      // this._startGame = this._startGame.bind(this)
       this._newUser = this._newUser.bind(this)
       this._questionReceived = this._questionReceived.bind(this)
       this._answerOK = this._answerOK.bind(this)
@@ -93,6 +91,7 @@ customElements.define('quiz-app',
       this._quiz.addEventListener('questionOK', this._questionReceived)
       this._quiz.addEventListener('answerOK', this._answerOK)
       this._timer.addEventListener('timerStopped', this._timerInfo)
+      this.addEventListener('timeEnd', this._gameover)
       this.addEventListener('gameover', this._gameover)
       this.addEventListener('win', this._gameover)
       this._restartButton.addEventListener('click', this._resetGame)
@@ -103,9 +102,13 @@ customElements.define('quiz-app',
      */
     disconnectedCallback () {
       this._username.removeEventListener('newUser', this._newUser)
+      this._quiz.removeEventListener('questionOK', this._questionReceived)
+      this._quiz.removeEventListener('answerOK', this._answerOK)
+      this._timer.removeEventListener('timerStopped', this._timerInfo)
+      this.removeEventListener('timeEnd', this._gameover)
       this.removeEventListener('gameover', this._gameover)
       this.removeEventListener('win', this._gameover)
-      this._restartButton.addEventListener('click', this._resetGame)
+      this._restartButton.removeEventListener('click', this._resetGame)
     }
 
     /**
@@ -114,7 +117,6 @@ customElements.define('quiz-app',
      * @param {Event} event - When user has submitted its nickname.
      */
     _newUser (event) {
-      console.log('New user here!')
       // Get the information obtained by the form from user-nickname.
       const newUser = event.detail.username
 
@@ -123,6 +125,7 @@ customElements.define('quiz-app',
         score: 0
       }
 
+      // Set the stage for the game and begin quiz.
       this._startGame(this._player)
     }
 
@@ -135,6 +138,7 @@ customElements.define('quiz-app',
       this._renderGame()
       this._gameState = 'quiz'
 
+      // Activate the first question.
       this._eventBus('startQuestion')
     }
 
@@ -144,9 +148,9 @@ customElements.define('quiz-app',
      * @param {Event} event - Event with information of time limit.
      */
     _questionReceived (event) {
-      // console.log(event.detail)
-
       let limitNumber = event.detail
+
+      // Make sure the question has the right time limit.
       limitNumber = Object.values(limitNumber)
       this._timer.setAttribute('limit', `${limitNumber}`)
 
@@ -154,49 +158,47 @@ customElements.define('quiz-app',
     }
 
     /**
-     * Handle event when the given answer has been checked and was right.
+     * When answer was correct and there are more questions to get.
      *
-     * @param {Event} event - The answer was right.
+     * @param {Event} event - When the answer was right.
      */
     _answerOK (event) {
       this._eventBus('stopTimer')
 
-      // // Next round!
-      console.log('Can we start another question?')
+      // Next question!
       this._eventBus('startQuestion')
     }
 
     /**
-     * Timer stopped, giving back info of elapsed time.
+     * Info about elapsed time to add to a player's score.
      *
-     * @param {Event} event - Timer stopped.
+     * @param {Event} event - Timer stopped and sent info about the time.
      */
     _timerInfo (event) {
       let score = event.detail
       score = Object.values(score)
-      console.log('The score of this question: ' + score)
       score = parseInt(score)
+
+      // Add time to the player's score.
       this._player.score += score
-      console.log(this._player)
     }
 
     /**
      * Update conditions for when the game is over.
      *
-     * @param {Event} event - Gameover, losing or winning.
+     * @param {Event} event - Event telling that the game is over.
      */
     _gameover (event) {
       this._eventBus('stopTimer')
 
-      if (event.type === 'gameover') {
-        console.log('GAME OVER!!!')
+      if (event.type === 'gameover' || event.type === 'timeEnd') {
         this._gameState = 'gameover'
       } else if (event.type === 'win') {
-        console.log('WIN!')
         this._gameState = 'win'
         this._playerWon = true
 
-        console.log(this._player)
+        // Player's score is taken into account only if it won.
+        // Send score for evaluation if making it to the highscore.
         this.dispatchEvent(new CustomEvent('newScore', { bubbles: true, composed: true, detail: { scoreInfo: this._player } }))
       }
 
@@ -209,10 +211,10 @@ customElements.define('quiz-app',
      * @param {Event} event - Click event to reset game.
      */
     _resetGame (event) {
-      console.log('resetting game')
       this._gameState = 'restarting'
       this._playerWon = false
 
+      // Make sure questions begin from the beginning.
       this._eventBus('resetQuestion')
 
       // Render and then reset the state to default.
